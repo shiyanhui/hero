@@ -6,6 +6,8 @@ It has been used in production environment in [bthub.io](http://bthub.io).
 [![GoDoc](https://godoc.org/github.com/shiyanhui/hero?status.svg)](https://godoc.org/github.com/shiyanhui/hero)
 [![Go Report Card](https://goreportcard.com/badge/github.com/shiyanhui/hero)](https://goreportcard.com/report/github.com/shiyanhui/hero)
 
+[中文文档](https://github.com/shiyanhui/hero/blob/master/README_CN.md)
+
 - [Features](#features)
 - [Install](#install)
 - [Usage](#usage)
@@ -22,7 +24,8 @@ It has been used in production environment in [bthub.io](http://bthub.io).
 
 ## Install
 
-    go get -u github.com/shiyanhui/hero
+    go get github.com/shiyanhui/hero
+    go install github.com/shiyanhui/hero/hero
 
 ## Usage
 
