@@ -214,7 +214,7 @@ There are only nine necessary kinds of statements, which are:
     %>
     ```
 
-- Raw Value `<%= statement %>`
+- Raw Value `<%== statement %>`
 
   - Raw Value statement will convert the variable to string.
 
@@ -227,7 +227,7 @@ There are only nine necessary kinds of statements, which are:
     <%== user.Name %>
     ```
 
-- Escaped Value `<%== statement %>`
+- Escaped Value `<%= statement %>`
 
   - Escaped Value statement is similar with Raw Value statement, but after converting, it will escaped it with `html.EscapesString`.
 
