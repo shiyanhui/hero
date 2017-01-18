@@ -217,30 +217,41 @@ There are only nine necessary kinds of statements, which are:
     %>
     ```
 
-- Raw Value `<%== statement %>`
+- Raw Value `<%==[t] variable %>`
 
   - Raw Value statement will convert the variable to string.
+  - `t` is the type of varible, hero will find suitable converting method by `t`. Condidates of `t` are:
+    - `b`: bool
+    - `i`: int, int8, int16, int32, int64
+    - `u`: byte, uint, uint8, uint16, uint32, uint64
+    - `f`: float32, float64
+    - `s`: string
+    - `bs`: []byte
+    - `v`: interface
 
+    Note:
+    - If `t` is not set, the value of `t` is `s`.
+    - Had better not use `v`, cause when `t=v`, the converting method is `fmt.Sprintf("%v", variable)` and it is very slow.
   - Example:
 
     ```go
-    <%== a %>
-    <%== a + b %>
-    <%== Add(a, b) %>
-    <%== user.Name %>
+    <%== "hello" %>
+    <%==i 34  %>
+    <%==u Add(a, b) %>
+    <%==s user.Name %>
     ```
 
-- Escaped Value `<%= statement %>`
+- Escaped Value `<%=[t] variable %>`
 
   - Escaped Value statement is similar with Raw Value statement, but after converting, it will escaped it with `html.EscapesString`.
-
+  - `t` is the same with that of `Raw Value Statement`.
   - Example:
 
     ```go
     <%= a %>
-    <%= a + b %>
-    <%= Add(a, b) %>
-    <%= user.Name %>
+    <%=i a + b %>
+    <%=u Add(a, b) %>
+    <%=bs []byte{1, 2} %>
     ```
 
 - Note `<%# note %>`

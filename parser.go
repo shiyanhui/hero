@@ -23,6 +23,16 @@ const (
 )
 
 const (
+	Bool      = "b"
+	Int       = "i"
+	Uint      = "u"
+	Float     = "f"
+	String    = "s"
+	Bytes     = "bs"
+	Interface = "v"
+)
+
+const (
 	OpenBrace   = '{'
 	CloseBrace  = '}'
 	LT          = '<'
@@ -72,6 +82,7 @@ func cleanGlobal() {
 
 type node struct {
 	t        uint8
+	subtype  string
 	children []*node
 	chunk    *bytes.Buffer
 }
@@ -145,21 +156,46 @@ func (n *node) insert(dir, subpath string, content []byte) {
 		}
 
 		switch content[0] {
-		case Exclamation, Colon, Pound, Equal:
+		case Exclamation, Colon, Pound:
+			t, c := prefixTypeMap[content[0]], content[1:i]
+			if len(bytes.TrimSpace(c)) > 0 {
+				n.children = append(n.children, newNode(t, c))
+			}
+		case Equal:
 			var (
-				t uint8
-				c []byte
+				t       uint8
+				subtype string
+				c       []byte
 			)
 
 			if content[0] == Equal && content[1] == Equal {
 				t, c = TypeRawValue, content[2:i]
 			} else {
-				t, c = prefixTypeMap[content[0]], content[1:i]
+				t, c = TypeEscapedValue, content[1:i]
 			}
 
-			if len(bytes.TrimSpace(c)) > 0 {
-				n.children = append(n.children, newNode(t, c))
+			parts := bytes.Split(c, []byte{Space})
+			if len(parts) > 0 {
+				subtype = string(parts[0])
+				if subtype == "" {
+					subtype = String
+				} else if subtype != Int && subtype != Uint &&
+					subtype != Float && subtype != Bool &&
+					subtype != Bytes && subtype != Interface {
+					log.Fatalf("unknown value type %s", subtype)
+				}
+
+				c = bytes.TrimSpace(bytes.Join(parts[1:], []byte{Space}))
+				if len(c) > 0 {
+					child := newNode(t, bytes.TrimSpace(c))
+					child.subtype = subtype
+
+					n.children = append(n.children, child)
+					goto ResetContent
+				}
 			}
+
+			log.Fatalf("lack of variable name")
 		case Tilde, Plus:
 			c := bytes.TrimSpace(content[1:i])
 
@@ -204,6 +240,7 @@ func (n *node) insert(dir, subpath string, content []byte) {
 			)
 		}
 
+	ResetContent:
 		content = content[i+2:]
 	}
 }

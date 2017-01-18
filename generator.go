@@ -41,18 +41,53 @@ func gen(n *node, buffer *bytes.Buffer) {
 				"_buffer.WriteString(`%s`)",
 				child.chunk.String(),
 			))
-		case TypeEscapedValue, TypeRawValue:
+		case TypeRawValue, TypeEscapedValue:
+			var format string
+
+			if child.subtype == Bytes {
+				if child.t == TypeRawValue {
+					buffer.WriteString(fmt.Sprintf(
+						"_buffer.Write(%s)",
+						child.chunk.String(),
+					))
+					goto WriteBreakLine
+				} else {
+					format = "(*string)(*unsafe.Pointer(&%s))"
+				}
+			} else {
+				switch child.subtype {
+				case Int:
+					format = "strconv.FormatInt(int64(%s), 10)"
+				case Uint:
+					format = "strconv.FormatUint(uint64(%s), 10)"
+				case Float:
+					format = "strconv.FormatFloat(float64(%s), 'f', -1, 64)"
+				case Bool:
+					format = "strconv.FormatBool(%s)"
+				case String:
+					format = "%s"
+				case Interface:
+					format = "fmt.Sprintf(\"%%v\", %s)"
+				default:
+					log.Fatal("unknown type")
+				}
+			}
+
+			if child.t == TypeEscapedValue {
+				format = fmt.Sprintf("html.EscapeString(%s)", format)
+			}
+
 			buffer.WriteString(fmt.Sprintf(
-				"hero.Convert(%s, %v, _buffer)",
-				child.chunk.String(),
-				child.t == TypeEscapedValue,
-			))
+				fmt.Sprintf("_buffer.WriteString(%s)", format),
+				child.chunk.String()),
+			)
 		case TypeBlock, TypeInclude:
 			gen(child, buffer)
 		default:
 			continue
 		}
 
+	WriteBreakLine:
 		buffer.WriteByte(BreakLine)
 	}
 }
@@ -109,6 +144,10 @@ func Generate(source, dest, pkgName string) {
 			`)
 			buffer.WriteString(fmt.Sprintf("package %s\n", pkgName))
 			buffer.WriteString(`
+				import "html"
+				import "strconv"
+				import "unsafe"
+
 				import "github.com/shiyanhui/hero"
 			`)
 
@@ -129,10 +168,7 @@ func Generate(source, dest, pkgName string) {
 			`)
 			gen(n, buffer)
 			buffer.WriteString(`
-				_r := make([]byte, _buffer.Len())
-				copy(_r, _buffer.Bytes())
-				hero.PutBuffer(_buffer)
-				return _r
+				return _buffer
 			}`)
 
 			writeToFile(fileName, buffer)
