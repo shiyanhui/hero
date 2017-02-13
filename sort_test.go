@@ -33,6 +33,7 @@ func TestAddEdge(t *testing.T) {
 		"c": {"4", "5", "6"},
 	}
 
+	// init graph.
 	for from, tos := range edges {
 		for _, to := range tos {
 			sort.addEdge(from, to)

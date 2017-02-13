@@ -20,10 +20,16 @@ type pool struct {
 
 func newPool() *pool {
 	p := &pool{
-		pool: new(sync.Pool),
-		ch:   make(chan *bytes.Buffer, buffSize),
+		pool: &sync.Pool{
+			New: func() interface{} {
+				return new(bytes.Buffer)
+			},
+		},
+		ch: make(chan *bytes.Buffer, buffSize),
 	}
 
+	// It's faster with unused channel buffer in go1.7.
+	// TODO: need removed?
 	for i := 0; i < buffSize; i++ {
 		p.ch <- new(bytes.Buffer)
 	}
@@ -32,18 +38,16 @@ func newPool() *pool {
 }
 
 // GetBuffer returns a *bytes.Buffer from sync.Pool.
-func GetBuffer() (buffer *bytes.Buffer) {
-	v := defaultPool.pool.Get()
-	if v == nil {
-		buffer = new(bytes.Buffer)
-	} else {
-		buffer = v.(*bytes.Buffer)
-	}
-	return
+func GetBuffer() *bytes.Buffer {
+	return defaultPool.pool.Get().(*bytes.Buffer)
 }
 
 // PutBuffer puts a *bytes.Buffer to the sync.Pool.
 func PutBuffer(buffer *bytes.Buffer) {
+	if buffer == nil {
+		return
+	}
+
 	buffer.Reset()
 	defaultPool.pool.Put(buffer)
 }

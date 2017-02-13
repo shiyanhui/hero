@@ -32,7 +32,7 @@ const itemHTML = `
 `
 
 const listHTML = `
-<%: func UserList(userList []string) []byte %>
+<%: func UserList(userList []string) *bytes.Buffer %>
 
 <%!
 	func Add(a, b int) int {
@@ -129,7 +129,7 @@ func testList(root *node, t *testing.T) {
 	child = root.children[0]
 	content = strings.TrimSpace(child.chunk.String())
 	if child.t != TypeDefinition ||
-		content != "func UserList(userList []string) []byte" {
+		content != "func UserList(userList []string) *bytes.Buffer" {
 		t.Fail()
 	}
 
@@ -179,7 +179,7 @@ func TestChildrenByType(t *testing.T) {
 	children = root.childrenByType(TypeDefinition)
 	content := strings.TrimSpace(children[0].chunk.String())
 	if len(children) != 1 || children[0].t != TypeDefinition ||
-		content != "func UserList(userList []string) []byte" {
+		content != "func UserList(userList []string) *bytes.Buffer" {
 		t.Fail()
 	}
 }
@@ -259,7 +259,7 @@ func testRebuild(root *node, t *testing.T) {
 	child = root.children[1]
 	content = strings.TrimSpace(child.chunk.String())
 	if child.t != TypeDefinition ||
-		content != "func UserList(userList []string) []byte" {
+		content != "func UserList(userList []string) *bytes.Buffer" {
 		t.Fail()
 	}
 

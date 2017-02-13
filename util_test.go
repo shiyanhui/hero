@@ -5,7 +5,7 @@ import (
 )
 
 func TestExecCommand(t *testing.T) {
-	// test for whether panic
+	// test for panic
 	execCommand("")
 	execCommand("ls")
 }

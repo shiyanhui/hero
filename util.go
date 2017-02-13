@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// execCommand wraps exec.Command
 func execCommand(command string) {
 	parts := strings.Split(command, " ")
 	if len(parts) == 0 {

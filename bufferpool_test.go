@@ -25,6 +25,6 @@ func TestGetBuffer(t *testing.T) {
 }
 
 func TestPutBubber(t *testing.T) {
-	// test for whether panic
+	// test for panic
 	PutBuffer(buffer)
 }

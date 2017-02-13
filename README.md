@@ -17,10 +17,18 @@ It has been used in production environment in [bthub.io](http://bthub.io).
 
 ## Features
 
+- High performance.
 - Easy to use.
 - Powerful. template `Extend` and `Include` supported.
-- High performance.
 - Auto compiling when files change.
+
+## Performance
+
+Hero is the fastest and least-memory used among currently known template engines
+in the benchmark. For more details and benchmarks please come to [github.com/SlinSo/goTemplateBenchmark](https://github.com/SlinSo/goTemplateBenchmark).
+
+<img src='http://i.imgur.com/93D7T5C.png' width="600">
+<img src='http://i.imgur.com/EIGtYyF.png' width="600">
 
 ## Install
 
@@ -69,7 +77,7 @@ And assumes that they are all under `$GOPATH/src/app/template`
 ### users.html
 
 ```html
-<%: func UserList(userList []string) []byte %>
+<%: func UserList(userList []string) *bytes.Buffer %>
 
 <%~ "index.html" %>
 
@@ -107,8 +115,11 @@ Then we write a http server in `$GOPATH/src/app/main.go`.
 package main
 
 import (
-	"app/template"
 	"net/http"
+
+	"app/template"
+
+    "github.com/shiyanhui/hero"
 )
 
 func main() {
@@ -118,7 +129,11 @@ func main() {
 			"Bob",
 			"Tom",
 		}
-		w.Write(template.UserList(userList))
+
+        buffer := template.UserList(userList)
+        defer hero.PutBuffer(buffer)
+
+		w.Write(buffer.Bytes())
 	})
 
 	http.ListenAndServe(":8080", nil)
@@ -133,8 +148,8 @@ There are only nine necessary kinds of statements, which are:
 
 - Function Definition `<%: func define %>`
   - Function definition statement defines the function which represents a html file.
-  - The function defined should return one and only one parameter `[]byte`.
-  - Example:`<%: func UserList(userList []string) []byte %>` , which we have mentioned in quick start.
+  - The function defined should return one and only one parameter `*bytes.Buffer`.
+  - Example:`<%: func UserList(userList []string) *bytes.Buffer %>`, which we have mentioned in quick start.
 
 - Extend `<%~ "parent template" %>`
   - Extend statement states the parent template the current template extends.
@@ -148,9 +163,7 @@ There are only nine necessary kinds of statements, which are:
 
 - Import `<%! go code %>`
   - Import statement imports the packages used in the defined function, and it also contains everything that is outside of the defined function.
-
   - Import statement will NOT be inherited by child template.
-
   - Example:
 
     ```go

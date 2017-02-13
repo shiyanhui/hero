@@ -38,6 +38,7 @@ func (s *sort) collect(queue *[]string) {
 	}
 }
 
+// sort returns sorted string list.
 func (s *sort) sort() []string {
 	for vertex := range s.vertices {
 		s.v[vertex] = 0

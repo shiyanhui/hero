@@ -31,6 +31,7 @@ func checkError(err error) {
 	}
 }
 
+// gen generates code to buffer.
 func gen(n *node, buffer *bytes.Buffer) {
 	for _, child := range n.children {
 		switch child.t {

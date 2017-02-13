@@ -14,10 +14,18 @@ Hero是一个高性能、强大并且易用的go模板引擎，工作原理是�
 
 ## Features
 
+- 高性能.
 - 非常易用.
 - 功能强大，支持模板继承和模板include.
-- 高性能.
 - 自动编译.
+
+## Performance
+
+Hero在目前已知的模板引擎中是速度是最快的，并且内存使用是最少的。下面是Benchmark
+结果，关于更多的细节和Benchmarks请到[github.com/SlinSo/goTemplateBenchmark](https://github.com/SlinSo/goTemplateBenchmark)查看。
+
+<img src='http://i.imgur.com/93D7T5C.png' width="600">
+<img src='http://i.imgur.com/EIGtYyF.png' width="600">
 
 ## Install
 
@@ -63,7 +71,7 @@ example:
 ### users.html
 
 ```html
-<%: func UserList(userList []string) []byte %>
+<%: func UserList(userList []string) *bytes.Buffer %>
 
 <%~ "index.html" %>
 
@@ -98,8 +106,11 @@ hero -source="$GOPATH/src/app/template"
 package main
 
 import (
-	"app/template"
 	"net/http"
+
+	"app/template"
+
+    "github.com/shiyanhui/hero"
 )
 
 func main() {
@@ -109,7 +120,11 @@ func main() {
 			"Bob",
 			"Tom",
 		}
-		w.Write(template.UserList(userList))
+
+        buffer := template.UserList(userList)
+        defer hero.PutBuffer(buffer)
+
+		w.Write(buffer.Bytes())
 	})
 
 	http.ListenAndServe(":8080", nil)
@@ -124,8 +139,8 @@ Hero总共有九种语句，他们分别是：
 
 - 函数定义语句 `<%: func define %>`
   - 该语句定义了该模板所对应的函数，如果一个模板中没有函数定义语句，那么最终结果不会生成对应的函数。
-  - 该函数必须返回一个`[]byte`参数。
-  - 例:`<%: func UserList(userList []string) []byte %>`
+  - 该函数必须返回一个`*bytes.Buffer`参数。
+  - 例:`<%: func UserList(userList []string) *bytes.Buffer %>`
 
 - 模板继承语句 `<%~ "parent template" %>`
   - 该语句声明要继承的模板。
@@ -206,23 +221,36 @@ Hero总共有九种语句，他们分别是：
     %>
     ```
 
-- 原生值语句 `<%== statement %>`
+- 原生值语句 `<%==[t] variable %>`
 
   - 该语句把变量转换为string。
+
+  - `t`是变量的类型，hero会自动根据`t`来选择转换函数。`t`的待选值有:
+    - `b`: bool
+    - `i`: int, int8, int16, int32, int64
+    - `u`: byte, uint, uint8, uint16, uint32, uint64
+    - `f`: float32, float64
+    - `s`: string
+    - `bs`: []byte
+    - `v`: interface
+
+    注意：
+    - 如果`t`没有设置，那么`t`默认为`s`.
+    - 最好不要使用`v`，因为其对应的转换函数为`fmt.Sprintf("%v", variable)`，该函数很慢。
 
   - 例:
 
     ```go
-    <%== a %>
-    <%== a + b %>
-    <%== Add(a, b) %>
-    <%== user.Name %>
+    <%== "hello" %>
+    <%==i 34  %>
+    <%==u Add(a, b) %>
+    <%==s user.Name %>
     ```
 
 - 转义值语句 `<%= statement %>`
 
   - 该语句把变量转换为string后，又通过`html.EscapesString`记性转义。
-
+  - `t`跟原生值中的`t`一样。
   - 例:
 
     ```go

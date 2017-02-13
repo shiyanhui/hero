@@ -317,6 +317,7 @@ func parseFile(dir, subpath string) *node {
 		log.Fatal(err)
 	}
 
+	// add dependency.
 	dependencies.addVertex(path)
 
 	root := newNode(TypeRoot, nil)

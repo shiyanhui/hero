@@ -34,13 +34,13 @@ func init() {
 		&pkgName,
 		"pkgname",
 		"template",
-		"the generated template package name",
+		"the generated template package name, default is `template`",
 	)
 	flag.BoolVar(
 		&watch,
 		"watch",
 		false,
-		"whether automic compile when the source files change",
+		"whether automaticly compile when the source files change",
 	)
 }
 
