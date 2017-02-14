@@ -25,7 +25,8 @@ It has been used in production environment in [bthub.io](http://bthub.io).
 ## Performance
 
 Hero is the fastest and least-memory used among currently known template engines
-in the benchmark. For more details and benchmarks please come to [github.com/SlinSo/goTemplateBenchmark](https://github.com/SlinSo/goTemplateBenchmark).
+in the benchmark. The data of chart comes from [https://github.com/SlinSo/goTemplateBenchmark](https://github.com/SlinSo/goTemplateBenchmark#full-featured-template-engines-2).
+You can find more details and benchmarks from that project.
 
 <img src='http://i.imgur.com/93D7T5C.png' width="600">
 <img src='http://i.imgur.com/EIGtYyF.png' width="600">

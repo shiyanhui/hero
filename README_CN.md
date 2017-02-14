@@ -21,8 +21,9 @@ Hero是一个高性能、强大并且易用的go模板引擎，工作原理是�
 
 ## Performance
 
-Hero在目前已知的模板引擎中是速度是最快的，并且内存使用是最少的。下面是Benchmark
-结果，关于更多的细节和Benchmarks请到[github.com/SlinSo/goTemplateBenchmark](https://github.com/SlinSo/goTemplateBenchmark)查看。
+Hero在目前已知的模板引擎中是速度是最快的，并且内存使用是最少的。下面Benchmark图表的数据
+来源于[https://github.com/SlinSo/goTemplateBenchmark](https://github.com/SlinSo/goTemplateBenchmark#full-featured-template-engines-2)，
+关于更多的细节和Benchmarks请到上述项目中查看。
 
 <img src='http://i.imgur.com/93D7T5C.png' width="600">
 <img src='http://i.imgur.com/EIGtYyF.png' width="600">
