@@ -1,6 +1,6 @@
 # Hero
 
-Hero is a handy, fast and powerful go template engine, which pre-compiles the html templtes to go code.
+Hero is a handy, fast and powerful go template engine, which pre-compiles the html templates to go code.
 It has been used in production environment in [bthub.io](http://bthub.io).
 
 [![GoDoc](https://godoc.org/github.com/shiyanhui/hero?status.svg)](https://godoc.org/github.com/shiyanhui/hero)
