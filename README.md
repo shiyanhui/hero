@@ -45,7 +45,7 @@ options:
 	- source:  the html template file or dir.
 	- dest:    generated golang files dir, it will be the same with source if not set.
 	- pkgname: the generated template package name, default is `template`.
-	- watch:   whether automic compile when the source files change.
+	- watch:   whether auto compile when the source files change.
 
 example:
 	hero -source="./"
@@ -234,7 +234,7 @@ There are only nine necessary kinds of statements, which are:
 - Raw Value `<%==[t] variable %>`
 
   - Raw Value statement will convert the variable to string.
-  - `t` is the type of varible, hero will find suitable converting method by `t`. Condidates of `t` are:
+  - `t` is the type of variable, hero will find suitable converting method by `t`. Candidates of `t` are:
     - `b`: bool
     - `i`: int, int8, int16, int32, int64
     - `u`: byte, uint, uint8, uint16, uint32, uint64
