@@ -42,7 +42,7 @@ You can find more details and benchmarks from that project.
 hero [options]
 
 options:
-	- source:  the html template file or dir.
+	- source:  the html template file or dir, default is current dir.
 	- dest:    generated golang files dir, it will be the same with source if not set.
 	- pkgname: the generated template package name, default is `template`.
 	- watch:   whether auto compile when the source files change.
@@ -75,10 +75,10 @@ And assumes that they are all under `$GOPATH/src/app/template`
 </html>
 ```
 
-### users.html
+### userlist.html
 
 ```html
-<%: func UserList(userList []string) *bytes.Buffer %>
+<%: func UserList(userList []string, buffer *bytes.Buffer) %>
 
 <%~ "index.html" %>
 
@@ -116,11 +116,10 @@ Then we write a http server in `$GOPATH/src/app/main.go`.
 package main
 
 import (
+    "bytes"
 	"net/http"
 
 	"app/template"
-
-    "github.com/shiyanhui/hero"
 )
 
 func main() {
@@ -131,8 +130,8 @@ func main() {
 			"Tom",
 		}
 
-        buffer := template.UserList(userList)
-        defer hero.PutBuffer(buffer)
+        buffer := new(bytes.Buffer)
+        template.UserList(userList, buffer)
 
 		w.Write(buffer.Bytes())
 	})
@@ -149,8 +148,8 @@ There are only nine necessary kinds of statements, which are:
 
 - Function Definition `<%: func define %>`
   - Function definition statement defines the function which represents a html file.
-  - The function defined should return one and only one parameter `*bytes.Buffer`.
-  - Example:`<%: func UserList(userList []string) *bytes.Buffer %>`, which we have mentioned in quick start.
+  - The function defined should contains a parameter `buffer *bytes.Buffer`.
+  - Example:`<%: func UserList(userList []string, buffer *bytes.Buffer) %>`, which we have mentioned in quick start.
 
 - Extend `<%~ "parent template" %>`
   - Extend statement states the parent template the current template extends.

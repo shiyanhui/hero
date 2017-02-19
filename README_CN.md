@@ -69,10 +69,10 @@ example:
 </html>
 ```
 
-### users.html
+### userlist.html
 
 ```html
-<%: func UserList(userList []string) *bytes.Buffer %>
+<%: func UserList(userList []string, buffer *bytes.Buffer) %>
 
 <%~ "index.html" %>
 
@@ -99,7 +99,8 @@ example:
 hero -source="$GOPATH/src/app/template"
 ```
 
-编译后，我们将在同一个目录下得到三个go文件，分别是`index.html.go`, `user.html.go` and `userlist.html.go`, 然后我们在http server里边去调用模板：
+编译后，我们将在同一个目录下得到三个go文件，分别是`index.html.go`, `user.html.go`
+和 `userlist.html.go`, 然后我们在http server里边去调用模板：
 
 ### main.go
 
@@ -107,23 +108,22 @@ hero -source="$GOPATH/src/app/template"
 package main
 
 import (
+	"bytes"
 	"net/http"
 
-	"app/template"
-
-    "github.com/shiyanhui/hero"
+	"github.com/shiyanhui/hero/examples/app/template"
 )
 
 func main() {
 	http.HandleFunc("/users", func(w http.ResponseWriter, req *http.Request) {
-		var userList = []string {
-          	"Alice",
+		var userList = []string{
+			"Alice",
 			"Bob",
 			"Tom",
 		}
 
-        buffer := template.UserList(userList)
-        defer hero.PutBuffer(buffer)
+		buffer := new(bytes.Buffer)
+		template.UserList(userList, buffer)
 
 		w.Write(buffer.Bytes())
 	})
@@ -140,7 +140,7 @@ Hero总共有九种语句，他们分别是：
 
 - 函数定义语句 `<%: func define %>`
   - 该语句定义了该模板所对应的函数，如果一个模板中没有函数定义语句，那么最终结果不会生成对应的函数。
-  - 该函数必须返回一个`*bytes.Buffer`参数。
+  - 该函数必须有一个`*bytes.Buffer`参数，且该参数的名字为`buffer`。
   - 例:`<%: func UserList(userList []string) *bytes.Buffer %>`
 
 - 模板继承语句 `<%~ "parent template" %>`
@@ -251,7 +251,7 @@ Hero总共有九种语句，他们分别是：
 - 转义值语句 `<%= statement %>`
 
   - 该语句把变量转换为string后，又通过`html.EscapesString`记性转义。
-  - `t`跟原生值中的`t`一样。
+  - `t`跟上面原生值语句中的`t`一样。
   - 例:
 
     ```go
