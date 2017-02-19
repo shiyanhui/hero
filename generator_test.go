@@ -84,7 +84,6 @@ package template
 
 import (
 	"bytes"
-	"html"
 
 	"github.com/shiyanhui/hero"
 )
@@ -92,10 +91,8 @@ import (
 func Add(a, b int) int {
 	return a + b
 }
-
-func UserList(userList []string) *bytes.Buffer {
-	_buffer := hero.GetBuffer()
-	_buffer.WriteString(` + "`" + `
+func UserList(userList []string, buffer *bytes.Buffer) {
+	buffer.WriteString(` + "`" + `
 <!DOCTYPE html>
 <html>
   <head>
@@ -103,26 +100,25 @@ func UserList(userList []string) *bytes.Buffer {
   <body>
     ` + "`" + `)
 	for _, user := range userList {
-		_buffer.WriteString(` + "`" + `
+		buffer.WriteString(` + "`" + `
 <div>
     <a href="/user/` + "`" + `)
-		_buffer.WriteString(html.EscapeString(user))
-		_buffer.WriteString(` + "`" + `">
+		hero.EscapeHTML(user, buffer)
+		buffer.WriteString(` + "`" + `">
         ` + "`" + `)
-		_buffer.WriteString(user)
-		_buffer.WriteString(` + "`" + `
+		buffer.WriteString(user)
+		buffer.WriteString(` + "`" + `
     </a>
 </div>
 ` + "`" + `)
 
 	}
 
-	_buffer.WriteString(` + "`" + `
+	buffer.WriteString(` + "`" + `
   </body>
 </html>
 ` + "`" + `)
 
-	return _buffer
 }
 		`},
 	}

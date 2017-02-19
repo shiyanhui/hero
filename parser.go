@@ -177,7 +177,7 @@ func (n *node) insert(dir, subpath string, content []byte) {
 			parts := bytes.Split(c, []byte{Space})
 			if len(parts) > 0 {
 				subtype = string(parts[0])
-				if subtype == "" {
+				if subtype == "" || subtype == String {
 					subtype = String
 				} else if subtype != Int && subtype != Uint &&
 					subtype != Float && subtype != Bool &&

@@ -11,6 +11,15 @@ import (
 	"sync"
 )
 
+var formatMap = map[string]string{
+	String:    "%s",
+	Interface: "fmt.Sprintf(\"%%v\", %s)",
+	Int:       "hero.FormatInt(int64(%s), buffer)",
+	Uint:      "hero.FormatUint(uint64(%s), buffer)",
+	Float:     "hero.FormatFloat(float64(%s), buffer)",
+	Bool:      "hero.FormatBool(%s, buffer)",
+}
+
 func writeToFile(path string, buffer *bytes.Buffer) {
 	err := ioutil.WriteFile(path, buffer.Bytes(), os.ModePerm)
 	if err != nil {
@@ -39,56 +48,47 @@ func gen(n *node, buffer *bytes.Buffer) {
 			buffer.Write(child.chunk.Bytes())
 		case TypeHTML:
 			buffer.WriteString(fmt.Sprintf(
-				"_buffer.WriteString(`%s`)",
+				"buffer.WriteString(`%s`)",
 				child.chunk.String(),
 			))
 		case TypeRawValue, TypeEscapedValue:
 			var format string
 
-			if child.subtype == Bytes {
+			switch child.subtype {
+			case Int, Uint, Float, Bool, String, Interface:
+				format = formatMap[child.subtype]
+				if child.subtype != String &&
+					child.subtype != Interface {
+					goto WriteFormat
+				}
+			case Bytes:
 				if child.t == TypeRawValue {
-					buffer.WriteString(fmt.Sprintf(
-						"_buffer.Write(%s)",
-						child.chunk.String(),
-					))
-					goto WriteBreakLine
-				} else {
-					format = "(*string)(*unsafe.Pointer(&%s))"
+					format = "buffer.Write(%s)"
+					goto WriteFormat
 				}
-			} else {
-				switch child.subtype {
-				case Int:
-					format = "strconv.FormatInt(int64(%s), 10)"
-				case Uint:
-					format = "strconv.FormatUint(uint64(%s), 10)"
-				case Float:
-					format = "strconv.FormatFloat(float64(%s), 'f', -1, 64)"
-				case Bool:
-					format = "strconv.FormatBool(%s)"
-				case String:
-					format = "%s"
-				case Interface:
-					format = "fmt.Sprintf(\"%%v\", %s)"
-				default:
-					log.Fatal("unknown type")
-				}
+				format = "*(*string)(unsafe.Pointer(&(%s)))"
+			default:
+				log.Fatal("unknown value type: " + child.subtype)
 			}
 
 			if child.t == TypeEscapedValue {
-				format = fmt.Sprintf("html.EscapeString(%s)", format)
+				format = fmt.Sprintf(
+					"hero.EscapeHTML(%s, buffer)", format,
+				)
+			} else {
+				format = fmt.Sprintf(
+					"buffer.WriteString(%s)", format,
+				)
 			}
 
-			buffer.WriteString(fmt.Sprintf(
-				fmt.Sprintf("_buffer.WriteString(%s)", format),
-				child.chunk.String()),
-			)
+		WriteFormat:
+			buffer.WriteString(fmt.Sprintf(format, child.chunk.String()))
 		case TypeBlock, TypeInclude:
 			gen(child, buffer)
 		default:
 			continue
 		}
 
-	WriteBreakLine:
 		buffer.WriteByte(BreakLine)
 	}
 }
@@ -146,7 +146,6 @@ func Generate(source, dest, pkgName string) {
 			buffer.WriteString(fmt.Sprintf("package %s\n", pkgName))
 			buffer.WriteString(`
 				import "html"
-				import "strconv"
 				import "unsafe"
 
 				import "github.com/shiyanhui/hero"
@@ -165,11 +164,9 @@ func Generate(source, dest, pkgName string) {
 
 			buffer.Write(definitions[0].chunk.Bytes())
 			buffer.WriteString(`{
-				_buffer := hero.GetBuffer()
 			`)
 			gen(n, buffer)
 			buffer.WriteString(`
-				return _buffer
 			}`)
 
 			writeToFile(fileName, buffer)
