@@ -5,6 +5,7 @@ It has been used in production environment in [bthub.io](http://bthub.io).
 
 [![GoDoc](https://godoc.org/github.com/shiyanhui/hero?status.svg)](https://godoc.org/github.com/shiyanhui/hero)
 [![Go Report Card](https://goreportcard.com/badge/github.com/shiyanhui/hero)](https://goreportcard.com/report/github.com/shiyanhui/hero)
+[![Travis CI](https://travis-ci.org/shiyanhui/hero.svg?branch=master)](https://travis-ci.org/shiyanhui/hero.svg?branch=master)
 
 [中文文档](https://github.com/shiyanhui/hero/blob/master/README_CN.md)
 
@@ -38,7 +39,7 @@ go get github.com/shiyanhui/hero
 go get github.com/shiyanhui/hero/hero
 
 # Hero needs `goimports` to format the generated codes.
-# So if you have not install `goimports`, please install it.
+# So if you have not installed `goimports`, please install it.
 go get golang.org/x/tools/cmd/goimports
 ```
 

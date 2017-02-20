@@ -1,0 +1,13 @@
+language: go
+go:
+    - 1.x
+    - 1.6
+    - 1.7.x
+    - 1.8.x
+    - master
+
+install:
+    go get golang.org/x/tools/cmd/goimports
+
+script:
+    go test

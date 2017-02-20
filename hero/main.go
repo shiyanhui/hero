@@ -40,7 +40,7 @@ func init() {
 		&watch,
 		"watch",
 		false,
-		"whether automaticly compile when the source files change",
+		"whether automatically compile when the source files change",
 	)
 }
 

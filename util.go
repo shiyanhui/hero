@@ -14,6 +14,7 @@ var (
 	escapedValues = []string{"&amp;", "&#39;", "&lt;", "&gt;", "&#34;"}
 )
 
+// EscapeHTML escapes the html and then put it to the buffer.
 func EscapeHTML(html string, buffer *bytes.Buffer) {
 	var i, j, k int
 
