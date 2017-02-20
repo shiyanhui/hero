@@ -31,7 +31,10 @@ Hero在目前已知的模板引擎中是速度是最快的，并且内存使用�
 ## Install
 
     go get github.com/shiyanhui/hero
-    go install github.com/shiyanhui/hero/hero
+    go get github.com/shiyanhui/hero/hero
+
+    // Hero需要goimports处理生成的go代码，所以需要安装goimports.
+    go get golang.org/x/tools/cmd/goimports
 
 ## Usage
 

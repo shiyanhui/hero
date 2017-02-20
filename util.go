@@ -2,6 +2,7 @@ package hero
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -98,5 +99,9 @@ func execCommand(command string) {
 
 	cmd := exec.Command(parts[0], parts[1:]...)
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(cmd.Run())
+	}
 }

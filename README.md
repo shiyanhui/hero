@@ -33,8 +33,14 @@ You can find more details and benchmarks from that project.
 
 ## Install
 
-    go get github.com/shiyanhui/hero
-    go install github.com/shiyanhui/hero/hero
+```shell
+go get github.com/shiyanhui/hero
+go get github.com/shiyanhui/hero/hero
+
+# Hero needs `goimports` to format the generated codes.
+# So if you have not install `goimports`, please install it.
+go get golang.org/x/tools/cmd/goimports
+```
 
 ## Usage
 
