@@ -165,7 +165,16 @@ func Generate(source, dest, pkgName string) {
 			buffer.Write(definitions[0].chunk.Bytes())
 			buffer.WriteString(`{
 			`)
-			gen(n, buffer)
+			definition := definitions[0].chunk.String()
+			if strings.Contains(definition, "w io.Writer") && !strings.Contains(definition, "buffer *bytes.Buffer") {
+				buffer.WriteString(`buffer := hero.GetBuffer()
+				defer hero.PutBuffer(buffer)
+				`)
+				gen(n, buffer)
+				buffer.WriteString(`w.Write(buffer.Bytes())`)
+			} else {
+				gen(n, buffer)
+			}			
 			buffer.WriteString(`
 			}`)
 
