@@ -171,7 +171,11 @@ func Generate(source, dest, pkgName string) {
 				defer hero.PutBuffer(buffer)
 				`)
 				gen(n, buffer)
-				buffer.WriteString(`w.Write(buffer.Bytes())`)
+				if strings.Contains(definition, "(n int, err error)") {
+					buffer.WriteString(`return w.Write(buffer.Bytes())`)
+				} else {
+					buffer.WriteString(`w.Write(buffer.Bytes())`)
+				}
 			} else {
 				gen(n, buffer)
 			}			

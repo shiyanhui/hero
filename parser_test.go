@@ -53,11 +53,18 @@ const listHTML = `
 const listToWriterHTML = `
 <%: func UserListToWriter(userList []string, w io.Writer) %>
 
-<%!
-	func Sum(a, b int) int {
-		return a + b
-	}
-%>
+<%~ "index.html" %>
+
+<%@ body { %>
+    <%# this is note %>
+    <% for _, user := range userList { %>
+        <%+ "item.html" %>
+    <% } %>
+<% } %>
+`
+
+const listToWriterWithResultHTML = `
+<%: func UserListToWriterWithResult(userList []string, w io.Writer) (n int, err error) %>
 
 <%~ "index.html" %>
 
@@ -84,6 +91,7 @@ func init() {
 		{"item.html", itemHTML},
 		{"list.html", listHTML},
 		{"listwriter.html", listToWriterHTML},
+		{"listwriterresult.html", listToWriterWithResultHTML},
 	}
 
 	for _, item := range items {

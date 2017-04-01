@@ -9,7 +9,7 @@ import (
 	"github.com/shiyanhui/hero"
 )
 
-func UserListToWriter(userList []string, w io.Writer) {
+func UserListToWriter(userList []string, w io.Writer) (n int, err error) {
 	buffer := hero.GetBuffer()
 	defer hero.PutBuffer(buffer)
 	buffer.WriteString(`<!DOCTYPE html>
@@ -40,5 +40,5 @@ func UserListToWriter(userList []string, w io.Writer) {
     </body>
 </html>
 `)
-	w.Write(buffer.Bytes())
+	return w.Write(buffer.Bytes())
 }
