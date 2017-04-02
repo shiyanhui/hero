@@ -2,14 +2,22 @@ package hero
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 )
+
+const TypeBytesBuffer = "*bytes.Buffer"
+const TypeIOWriter = "io.Writer"
 
 var formatMap = map[string]string{
 	String:    "%s",
@@ -40,15 +48,78 @@ func checkError(err error) {
 	}
 }
 
+// parseDefinition parses the function definition.
+func parseDefinition(definition string) (*ast.FuncDecl, error) {
+	src := fmt.Sprintf("package hero\n%s", definition)
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "", src, parser.AllErrors)
+	if err != nil {
+		return nil, err
+	}
+
+	funcDecl, ok := file.Decls[0].(*ast.FuncDecl)
+	if !ok {
+		return nil, errors.New("Definition is not function type")
+	}
+	return funcDecl, nil
+}
+
+// parseParams parses parameters in the function definition.
+func parseParams(funcDecl *ast.FuncDecl) (name, t string, err error) {
+	params := funcDecl.Type.Params.List
+	if len(params) == 0 {
+		err = errors.New(
+			"Definition parameters should not be empty",
+		)
+		return
+	}
+
+	lastParam := params[len(params)-1]
+
+	selectorExpr, ok := lastParam.Type.(*ast.SelectorExpr)
+	if !ok {
+		err = errors.New(
+			"The last parameter should be *bytes.Buffer or io.Writer type",
+		)
+		return
+	}
+
+	t = fmt.Sprintf("%s.%s", selectorExpr.X, selectorExpr.Sel)
+
+	if t != TypeBytesBuffer && t != TypeIOWriter {
+		err = errors.New(
+			"The last parameter should be *bytes.Buffer or io.Writer type",
+		)
+		return
+	}
+
+	if n := len(lastParam.Names); n > 0 {
+		name = lastParam.Names[n-1].Name
+	}
+
+	return
+}
+
+// parseResults parses the returned results in the function definition.
+func parseResults(funcDecl *ast.FuncDecl) (types []string) {
+	results := funcDecl.Type.Results.List
+	for _, field := range results {
+		types = append(types, fmt.Sprintf("%s", field.Type))
+	}
+	return
+}
+
 // gen generates code to buffer.
-func gen(n *node, buffer *bytes.Buffer) {
+func gen(n *node, buffer *bytes.Buffer, bufName string) {
 	for _, child := range n.children {
 		switch child.t {
 		case TypeCode:
 			buffer.Write(child.chunk.Bytes())
 		case TypeHTML:
 			buffer.WriteString(fmt.Sprintf(
-				"buffer.WriteString(`%s`)",
+				"%s.WriteString(`%s`)",
+				bufName,
 				child.chunk.String(),
 			))
 		case TypeRawValue, TypeEscapedValue:
@@ -63,7 +134,7 @@ func gen(n *node, buffer *bytes.Buffer) {
 				}
 			case Bytes:
 				if child.t == TypeRawValue {
-					format = "buffer.Write(%s)"
+					format = fmt.Sprintf("%s.Write(%%s)", bufName)
 					goto WriteFormat
 				}
 				format = "*(*string)(unsafe.Pointer(&(%s)))"
@@ -73,18 +144,18 @@ func gen(n *node, buffer *bytes.Buffer) {
 
 			if child.t == TypeEscapedValue {
 				format = fmt.Sprintf(
-					"hero.EscapeHTML(%s, buffer)", format,
+					"hero.EscapeHTML(%s, %s)", format, bufName,
 				)
 			} else {
 				format = fmt.Sprintf(
-					"buffer.WriteString(%s)", format,
+					"%s.WriteString(%s)", bufName, format,
 				)
 			}
 
 		WriteFormat:
 			buffer.WriteString(fmt.Sprintf(format, child.chunk.String()))
 		case TypeBlock, TypeInclude:
-			gen(child, buffer)
+			gen(child, buffer, bufName)
 		default:
 			continue
 		}
@@ -162,23 +233,44 @@ func Generate(source, dest, pkgName string) {
 				return
 			}
 
-			buffer.Write(definitions[0].chunk.Bytes())
+			definition := definitions[0].chunk.String()
+
+			funcDecl, err := parseDefinition(definition)
+			checkError(err)
+
+			buffer.WriteString(definition)
 			buffer.WriteString(`{
 			`)
-			definition := definitions[0].chunk.String()
-			if strings.Contains(definition, "w io.Writer") && !strings.Contains(definition, "buffer *bytes.Buffer") {
-				buffer.WriteString(`buffer := hero.GetBuffer()
-				defer hero.PutBuffer(buffer)
-				`)
-				gen(n, buffer)
-				if strings.Contains(definition, "(n int, err error)") {
-					buffer.WriteString(`return w.Write(buffer.Bytes())`)
-				} else {
-					buffer.WriteString(`w.Write(buffer.Bytes())`)
+
+			paramName, paramType, err := parseParams(funcDecl)
+			checkError(err)
+
+			if paramType == TypeIOWriter {
+				bufName := "_buffer"
+
+				buffer.WriteString(
+					fmt.Sprintf(
+						"%s := hero.GetBuffer()\ndefer hero.PutBuffer(%s)\n",
+						bufName, bufName,
+					),
+				)
+				gen(n, buffer, bufName)
+
+				results, ret := parseResults(funcDecl), ""
+				if reflect.DeepEqual(results, []string{"int", "error"}) {
+					ret = "return"
 				}
+
+				buffer.WriteString(
+					fmt.Sprintf(
+						"%s %s.Write(%s.Bytes())\n",
+						ret, paramName, bufName,
+					),
+				)
 			} else {
-				gen(n, buffer)
-			}			
+				gen(n, buffer, paramName)
+			}
+
 			buffer.WriteString(`
 			}`)
 
