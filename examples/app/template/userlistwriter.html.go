@@ -9,10 +9,10 @@ import (
 	"github.com/shiyanhui/hero"
 )
 
-func UserListToWriter(userList []string, w io.Writer) (n int, err error) {
-	buffer := hero.GetBuffer()
-	defer hero.PutBuffer(buffer)
-	buffer.WriteString(`<!DOCTYPE html>
+func UserListToWriter(userList []string, w io.Writer) (int, error) {
+	_buffer := hero.GetBuffer()
+	defer hero.PutBuffer(_buffer)
+	_buffer.WriteString(`<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -21,24 +21,25 @@ func UserListToWriter(userList []string, w io.Writer) (n int, err error) {
     <body>
         `)
 	for _, user := range userList {
-		buffer.WriteString(`
+		_buffer.WriteString(`
         <ul>
             `)
-		buffer.WriteString(`<li>
+		_buffer.WriteString(`<li>
     `)
-		hero.EscapeHTML(user, buffer)
-		buffer.WriteString(`
+		hero.EscapeHTML(user, _buffer)
+		_buffer.WriteString(`
 </li>
 `)
 
-		buffer.WriteString(`
+		_buffer.WriteString(`
         </ul>
     `)
 	}
 
-	buffer.WriteString(`
+	_buffer.WriteString(`
     </body>
 </html>
 `)
-	return w.Write(buffer.Bytes())
+	return w.Write(_buffer.Bytes())
+
 }

@@ -16,8 +16,12 @@ import (
 	"sync"
 )
 
-const TypeBytesBuffer = "*bytes.Buffer"
+const TypeBytesBuffer = "bytes.Buffer"
 const TypeIOWriter = "io.Writer"
+
+var expectParamError = errors.New(
+	"The last parameter should be *bytes.Buffer or io.Writer type",
+)
 
 var formatMap = map[string]string{
 	String:    "%s",
@@ -77,20 +81,20 @@ func parseParams(funcDecl *ast.FuncDecl) (name, t string, err error) {
 
 	lastParam := params[len(params)-1]
 
-	selectorExpr, ok := lastParam.Type.(*ast.SelectorExpr)
+	expr := lastParam.Type
+	if starExpr, ok := expr.(*ast.StarExpr); ok {
+		expr = starExpr.X
+	}
+
+	selectorExpr, ok := expr.(*ast.SelectorExpr)
 	if !ok {
-		err = errors.New(
-			"The last parameter should be *bytes.Buffer or io.Writer type",
-		)
+		err = expectParamError
 		return
 	}
 
 	t = fmt.Sprintf("%s.%s", selectorExpr.X, selectorExpr.Sel)
-
 	if t != TypeBytesBuffer && t != TypeIOWriter {
-		err = errors.New(
-			"The last parameter should be *bytes.Buffer or io.Writer type",
-		)
+		err = errors.New("waht the funck " + t)
 		return
 	}
 
@@ -103,9 +107,10 @@ func parseParams(funcDecl *ast.FuncDecl) (name, t string, err error) {
 
 // parseResults parses the returned results in the function definition.
 func parseResults(funcDecl *ast.FuncDecl) (types []string) {
-	results := funcDecl.Type.Results.List
-	for _, field := range results {
-		types = append(types, fmt.Sprintf("%s", field.Type))
+	if results := funcDecl.Type.Results; results != nil {
+		for _, field := range results.List {
+			types = append(types, fmt.Sprintf("%s", field.Type))
+		}
 	}
 	return
 }
