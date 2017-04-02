@@ -26,5 +26,16 @@ func main() {
 		w.Write(buffer.Bytes())
 	})
 
+	http.HandleFunc("/users2", func(w http.ResponseWriter, req *http.Request) {
+		var userList = []string{
+			"Alice",
+			"Bob",
+			"Tom",
+		}
+
+		// using an io.Writer for automatic buffer management (i.e. hero built-in buffer pool)
+		template.UserListToWriter(userList, w)
+	})
+
 	http.ListenAndServe(":8080", nil)
 }

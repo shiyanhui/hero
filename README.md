@@ -155,7 +155,7 @@ There are only nine necessary kinds of statements, which are:
 
 - Function Definition `<%: func define %>`
   - Function definition statement defines the function which represents a html file.
-  - The function defined should contains a parameter `buffer *bytes.Buffer`.
+  - The function defined should contains a parameter `buffer *bytes.Buffer` for manual buffer management or `w io.Writer` for automatic buffer management (note: if using `w io.Writer` you may optionally specify return values `(n int, err error)` to handle the result of `w.Write`).
   - Example:`<%: func UserList(userList []string, buffer *bytes.Buffer) %>`, which we have mentioned in quick start.
 
 - Extend `<%~ "parent template" %>`

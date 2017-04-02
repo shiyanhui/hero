@@ -50,6 +50,32 @@ const listHTML = `
 <% } %>
 `
 
+const listToWriterHTML = `
+<%: func UserListToWriter(userList []string, w io.Writer) %>
+
+<%~ "index.html" %>
+
+<%@ body { %>
+    <%# this is note %>
+    <% for _, user := range userList { %>
+        <%+ "item.html" %>
+    <% } %>
+<% } %>
+`
+
+const listToWriterWithResultHTML = `
+<%: func UserListToWriterWithResult(userList []string, w io.Writer) (n int, err error) %>
+
+<%~ "index.html" %>
+
+<%@ body { %>
+    <%# this is note %>
+    <% for _, user := range userList { %>
+        <%+ "item.html" %>
+    <% } %>
+<% } %>
+`
+
 func init() {
 	_, err := os.Stat(rootDir)
 	if os.IsExist(err) {
@@ -64,6 +90,8 @@ func init() {
 		{"index.html", indexHTML},
 		{"item.html", itemHTML},
 		{"list.html", listHTML},
+		{"listwriter.html", listToWriterHTML},
+		{"listwriterresult.html", listToWriterWithResultHTML},
 	}
 
 	for _, item := range items {
