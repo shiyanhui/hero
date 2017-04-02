@@ -35,11 +35,9 @@ You can find more details and benchmarks from that project.
 ## Install
 
 ```shell
-go get github.com/shiyanhui/hero
 go get github.com/shiyanhui/hero/hero
 
 # Hero needs `goimports` to format the generated codes.
-# So if you have not installed `goimports`, please install it.
 go get golang.org/x/tools/cmd/goimports
 ```
 
@@ -124,26 +122,33 @@ package main
 
 import (
     "bytes"
-	"net/http"
+    "net/http"
 
-	"app/template"
+    "app/template"
 )
 
 func main() {
-	http.HandleFunc("/users", func(w http.ResponseWriter, req *http.Request) {
-		var userList = []string {
-          	"Alice",
-			"Bob",
-			"Tom",
-		}
+    http.HandleFunc("/users", func(w http.ResponseWriter, req *http.Request) {
+        var userList = []string {
+            "Alice",
+            "Bob",
+            "Tom",
+        }
 
+        // Had better use buffer pool. Hero exports GetBuffer and Put Buffer for this.
+        //
+        // For convenience, hero also supports `io.Writer`. For example, you
+        // can also define the function to `func UserList(userList []string, w io.Writer) (int, error)`,
+        // and then:
+        //
+        //   template.UserList(userList, w)
+        //
         buffer := new(bytes.Buffer)
         template.UserList(userList, buffer)
+        w.Write(buffer.Bytes())
+    })
 
-		w.Write(buffer.Bytes())
-	})
-
-	http.ListenAndServe(":8080", nil)
+    http.ListenAndServe(":8080", nil)
 }
 ```
 
@@ -155,8 +160,13 @@ There are only nine necessary kinds of statements, which are:
 
 - Function Definition `<%: func define %>`
   - Function definition statement defines the function which represents a html file.
-  - The function defined should contains a parameter `buffer *bytes.Buffer` for manual buffer management or `w io.Writer` for automatic buffer management (note: if using `w io.Writer` you may optionally specify return values `(n int, err error)` to handle the result of `w.Write`).
-  - Example:`<%: func UserList(userList []string, buffer *bytes.Buffer) %>`, which we have mentioned in quick start.
+  - The type of the last parameter in the function defined should be `*bytes.Buffer` for manual buffer management or `io.Writer` for automatic buffer management (
+    note: if using `io.Writer` you may optionally specify return values `(int, error)` to handle the result of `io.Wirter.Write`). Hero will identify the parameter name
+    automaticly.
+  - Example:
+    - `<%: func UserList(userList []string, buffer *bytes.Buffer) %>`
+    - `<%: func UserList(userList []string, w io.Writer) %>`
+    - `<%: func UserList(userList []string, w io.Writer) (int, error) %>`
 
 - Extend `<%~ "parent template" %>`
   - Extend statement states the parent template the current template extends.
