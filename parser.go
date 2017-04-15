@@ -284,7 +284,9 @@ func (n *node) rebuild() {
 
 		for _, child := range pNode.children {
 			switch child.t {
-			case TypeHTML, TypeCode, TypeEscapedValue, TypeRawValue:
+			case TypeHTML, TypeCode, TypeEscapedValue,
+				TypeRawValue, TypeInclude:
+
 				children = append(children, child)
 			case TypeBlock:
 				block := n.findBlockByName(child.chunk.String())
