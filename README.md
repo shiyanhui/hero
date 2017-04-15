@@ -135,10 +135,10 @@ func main() {
             "Tom",
         }
 
-        // Had better use buffer pool. Hero exports GetBuffer and Put Buffer for this.
+        // Had better use buffer pool. Hero exports `GetBuffer` and `PutBuffer` for this.
         //
-        // For convenience, hero also supports `io.Writer`. For example, you
-        // can also define the function to `func UserList(userList []string, w io.Writer) (int, error)`,
+        // For convenience, hero also supports `io.Writer`. For example, you can also define
+        // the function to `func UserList(userList []string, w io.Writer) (int, error)`,
         // and then:
         //
         //   template.UserList(userList, w)
@@ -185,26 +185,26 @@ There are only nine necessary kinds of statements, which are:
 
     ```go
     <%!
-    	import (
-          	"fmt"
-        	"strings"
-        )
+      import (
+          "fmt"
+          "strings"
+      )
 
-    	var a int
+      var a int
 
-    	const b = "hello, world"
+      const b = "hello, world"
 
-    	func Add(a, b int) int {
-        	return a + b
-    	}
+      func Add(a, b int) int {
+          return a + b
+      }
 
-    	type S struct {
-        	Name string
-    	}
+      type S struct {
+          Name string
+      }
 
-    	func (s S) String() string {
-        	return s.Name
-    	}
+      func (s S) String() string {
+          return s.Name
+      }
     %>
     ```
 
@@ -237,13 +237,13 @@ There are only nine necessary kinds of statements, which are:
     ```go
     <% for _, user := userList { %>
         <% if user != "Alice" { %>
-        	<%= user %>
+            <%= user %>
         <% } %>
     <% } %>
 
     <%
-    	a, b := 1, 2
-    	c := Add(a, b)
+        a, b := 1, 2
+        c := Add(a, b)
     %>
     ```
 
