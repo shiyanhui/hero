@@ -23,13 +23,26 @@ var expectParamError = errors.New(
 	"The last parameter should be *bytes.Buffer or io.Writer type",
 )
 
-var formatMap = map[string]string{
-	String:    "%s",
-	Interface: "fmt.Sprintf(\"%%v\", %s)",
-	Int:       "hero.FormatInt(int64(%s), buffer)",
-	Uint:      "hero.FormatUint(uint64(%s), buffer)",
-	Float:     "hero.FormatFloat(float64(%s), buffer)",
-	Bool:      "hero.FormatBool(%s, buffer)",
+func formatMap(t, bufName string) string {
+	switch t {
+	case String:
+		return "%s"
+	case Interface:
+		return "fmt.Sprintf(\"%%v\", %s)"
+	}
+
+	m := map[string]string{
+		Int:   "hero.FormatInt(int64(%%s), %s)",
+		Uint:  "hero.FormatUint(uint64(%%s), %s)",
+		Float: "hero.FormatFloat(float64(%%s), %s)",
+		Bool:  "hero.FormatBool(%%s, %s)",
+	}
+
+	format, ok := m[t]
+	if !ok {
+		log.Fatal("Unknown type ", t)
+	}
+	return fmt.Sprintf(format, bufName)
 }
 
 func writeToFile(path string, buffer *bytes.Buffer) {
@@ -132,7 +145,7 @@ func gen(n *node, buffer *bytes.Buffer, bufName string) {
 
 			switch child.subtype {
 			case Int, Uint, Float, Bool, String, Interface:
-				format = formatMap[child.subtype]
+				format = formatMap(child.subtype, bufName)
 				if child.subtype != String &&
 					child.subtype != Interface {
 					goto WriteFormat
