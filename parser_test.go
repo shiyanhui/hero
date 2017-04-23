@@ -2,6 +2,7 @@ package hero
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"reflect"
@@ -78,10 +79,14 @@ const listToWriterWithResultHTML = `
 
 func init() {
 	_, err := os.Stat(rootDir)
-	if os.IsExist(err) {
-		os.RemoveAll(rootDir)
+	if !os.IsNotExist(err) {
+		if err = os.RemoveAll(rootDir); err != nil {
+			log.Panic(err)
+		}
 	}
-	os.Mkdir(rootDir, os.ModePerm)
+	if err = os.Mkdir(rootDir, os.ModePerm); err != nil {
+		log.Panic(err)
+	}
 
 	items := []struct {
 		name    string
@@ -95,11 +100,14 @@ func init() {
 	}
 
 	for _, item := range items {
-		ioutil.WriteFile(
-			path.Join(rootDir, item.name),
+		err = ioutil.WriteFile(
+			filepath.Join(rootDir, item.name),
 			[]byte(item.content),
 			os.ModePerm,
 		)
+		if err != nil {
+			log.Panic(err)
+		}
 	}
 }
 

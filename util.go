@@ -103,6 +103,6 @@ func execCommand(command string) {
 
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println(cmd.Run())
+		fmt.Println(err)
 	}
 }

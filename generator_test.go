@@ -36,7 +36,10 @@ func TestWriteToFile(t *testing.T) {
 }
 
 func TestGenAbsPath(t *testing.T) {
-	dir, _ := filepath.Abs("./")
+	dir, err := filepath.Abs("./")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	parts := strings.Split(dir, "/")
 	parent := strings.Join(parts[:len(parts)-1], "/")
@@ -51,8 +54,9 @@ func TestGenAbsPath(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		if genAbsPath(c.in) != c.out {
-			t.Fail()
+		got := genAbsPath(c.in)
+		if got != c.out {
+			t.Errorf("want: %s got: %s", c.out, got)
 		}
 	}
 }
@@ -213,11 +217,14 @@ func UserListToWriterWithResult(userList []string, w io.Writer) (n int, err erro
 
 	for _, c := range cases {
 		content, err := ioutil.ReadFile(filepath.Join(rootDir, c.file))
-		if err != nil || !reflect.DeepEqual(
-			replacer.ReplaceAll(content, nil),
-			[]byte(replacer.ReplaceAllString(c.code, "")),
-		) {
-			t.Fail()
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		got := replacer.ReplaceAll(content, nil)
+		want := []byte(replacer.ReplaceAllString(c.code, ""))
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("\nfile: %s\n\nwant:\n%s\n\ngot:\n%s\n", c.file, want, got)
 		}
 	}
 }
