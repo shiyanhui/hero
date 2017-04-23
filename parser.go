@@ -127,7 +127,10 @@ Panic:
 }
 
 func (n *node) insert(dir, subpath string, content []byte) {
-	path, _ := filepath.Abs(filepath.Join(dir, subpath))
+	path, err := filepath.Abs(filepath.Join(dir, subpath))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	for len(content) > 0 {
 		i := bytes.Index(content, openTag)
@@ -152,7 +155,7 @@ func (n *node) insert(dir, subpath string, content []byte) {
 
 		i = bytes.Index(content, closeTag)
 		if i == -1 {
-			log.Fatalf("'<%' not closed in file `%s`", path)
+			log.Fatalf("'<%%' not closed in file `%s`", path)
 		}
 
 		switch content[0] {
@@ -195,7 +198,7 @@ func (n *node) insert(dir, subpath string, content []byte) {
 				}
 			}
 
-			log.Fatalf("lack of variable name")
+			log.Fatal("lack of variable name")
 		case Tilde, Plus:
 			c := bytes.TrimSpace(content[1:i])
 
@@ -225,7 +228,7 @@ func (n *node) insert(dir, subpath string, content []byte) {
 
 			blockName := child.chunk.String()
 			if b := n.findBlockByName(blockName); b != nil {
-				log.Fatal("duplicate block %s in file `%s`", blockName, path)
+				log.Fatalf("duplicate block %s in file `%s`", blockName, path)
 			}
 
 			var childContent []byte
@@ -304,13 +307,25 @@ func (n *node) rebuild() {
 		case TypeBlock:
 			child.rebuild()
 		case TypeInclude:
-			child.children = parsedNodes[child.chunk.String()].children
+			key := child.chunk.String()
+			node, ok := parsedNodes[key]
+			if !ok {
+				var keys []string
+				for k := range parsedNodes {
+					keys = append(keys, k)
+				}
+				log.Fatalf("node \"%s\" not found. have: %v", key, keys)
+			}
+			child.children = node.children
 		}
 	}
 }
 
 func parseFile(dir, subpath string) *node {
-	path, _ := filepath.Abs(filepath.Join(dir, subpath))
+	path, err := filepath.Abs(filepath.Join(dir, subpath))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -337,10 +352,10 @@ func parseFile(dir, subpath string) *node {
 }
 
 func parseDir(dir string) {
-	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		stat, err := os.Stat(path)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		if filepath.Ext(path) == ".html" && !stat.IsDir() {
@@ -349,6 +364,9 @@ func parseDir(dir string) {
 		}
 		return nil
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	queue := dependencies.sort()
 	for _, path := range queue {

@@ -2,14 +2,16 @@ package hero
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 )
 
-const rootDir = "/tmp/gohero"
+var rootDir string
 
 const indexHTML = `
 <!DOCTYPE html>
@@ -77,11 +79,21 @@ const listToWriterWithResultHTML = `
 `
 
 func init() {
-	_, err := os.Stat(rootDir)
-	if os.IsExist(err) {
-		os.RemoveAll(rootDir)
+	if runtime.GOOS != "windows" {
+		rootDir = "/tmp/gohero"
+	} else {
+		rootDir = `C:\tmp\gohero`
 	}
-	os.Mkdir(rootDir, os.ModePerm)
+
+	_, err := os.Stat(rootDir)
+	if !os.IsNotExist(err) {
+		if err = os.RemoveAll(rootDir); err != nil {
+			log.Panic(err)
+		}
+	}
+	if err = os.Mkdir(rootDir, os.ModePerm); err != nil {
+		log.Panic(err)
+	}
 
 	items := []struct {
 		name    string
@@ -95,11 +107,14 @@ func init() {
 	}
 
 	for _, item := range items {
-		ioutil.WriteFile(
-			path.Join(rootDir, item.name),
+		err = ioutil.WriteFile(
+			filepath.Join(rootDir, item.name),
 			[]byte(item.content),
 			os.ModePerm,
 		)
+		if err != nil {
+			log.Panic(err)
+		}
 	}
 }
 
@@ -144,7 +159,7 @@ func TestSplitByEndBlock(t *testing.T) {
 
 func buildTree() *node {
 	root := newNode(TypeRoot, nil)
-	root.insert("/tmp/gohero", "list.html", []byte(listHTML))
+	root.insert(rootDir, "list.html", []byte(listHTML))
 	return root
 }
 
@@ -171,7 +186,7 @@ func testList(root *node, t *testing.T) {
 
 	child = root.children[2]
 	content = strings.TrimSpace(child.chunk.String())
-	if child.t != TypeExtend || content != "/tmp/gohero/index.html" {
+	if child.t != TypeExtend || content != filepath.Join(rootDir, "index.html") {
 		t.Fail()
 	}
 
@@ -183,7 +198,7 @@ func testList(root *node, t *testing.T) {
 
 	include := child.children[2]
 	if include.t != TypeInclude ||
-		include.chunk.String() != path.Join(rootDir, "item.html") ||
+		include.chunk.String() != filepath.Join(rootDir, "item.html") ||
 		len(include.children) != 0 {
 		t.Fail()
 	}
@@ -238,9 +253,9 @@ func TestParseFile(t *testing.T) {
 		t.Fail()
 	}
 
-	pathIndex := path.Join(rootDir, "index.html")
-	pathItem := path.Join(rootDir, "item.html")
-	pathList := path.Join(rootDir, "list.html")
+	pathIndex := filepath.Join(rootDir, "index.html")
+	pathItem := filepath.Join(rootDir, "item.html")
+	pathList := filepath.Join(rootDir, "list.html")
 
 	vertices := map[string]struct{}{
 		pathIndex: struct{}{},
@@ -310,7 +325,7 @@ func testRebuild(root *node, t *testing.T) {
 
 	include := child.children[2]
 	if include.t != TypeInclude ||
-		include.chunk.String() != path.Join(rootDir, "item.html") ||
+		include.chunk.String() != filepath.Join(rootDir, "item.html") ||
 		len(include.children) != 5 {
 		t.Fail()
 	}
@@ -331,10 +346,10 @@ func TestRebuild(t *testing.T) {
 	}
 
 	for _, p := range paths {
-		parsedNodes[path.Join(rootDir, p)] = parseFile(rootDir, p)
+		parsedNodes[filepath.Join(rootDir, p)] = parseFile(rootDir, p)
 	}
 
-	root := parsedNodes[path.Join(rootDir, "list.html")]
+	root := parsedNodes[filepath.Join(rootDir, "list.html")]
 	root.rebuild()
 
 	testRebuild(root, t)
@@ -346,6 +361,6 @@ func TestParseDir(t *testing.T) {
 
 	parseDir(rootDir)
 
-	root := parsedNodes[path.Join(rootDir, "list.html")]
+	root := parsedNodes[filepath.Join(rootDir, "list.html")]
 	testRebuild(root, t)
 }

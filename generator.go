@@ -219,7 +219,7 @@ func Generate(source, dest, pkgName string) {
 
 		fileName := filepath.Join(dest, fmt.Sprintf(
 			"%s.go",
-			strings.Join(strings.Split(path[len(source)+1:], "/"), "_"),
+			strings.Join(strings.Split(path[len(source)+1:], string(filepath.Separator)), "_"),
 		))
 
 		go func(n *node, source, fileName string) {
