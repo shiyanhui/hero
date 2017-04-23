@@ -60,12 +60,9 @@ var prefixTypeMap = map[byte]uint8{
 }
 
 var (
-	openTag           = []byte{LT, Percent}                           // <%
-	closeTag          = []byte{Percent, GT}                           // %>
-	openBraceTag      = []byte{OpenBrace}                             // {
-	closeBraceTag     = []byte{CloseBrace}                            // }
-	byteSliceTag      = []byte{91, 93, 98, 121, 116, 101}             // []byte
-	byteSliceExtraTag = append(append([]byte{}, byteSliceTag...), 41) // []byte)
+	openTag      = []byte{LT, Percent} // <%
+	closeTag     = []byte{Percent, GT} // %>
+	openBraceTag = []byte{OpenBrace}   // {
 )
 
 var parsedNodes map[string]*node
@@ -204,7 +201,9 @@ func (n *node) insert(dir, subpath string, content []byte) {
 
 			parent := string(c[1 : len(c)-1])
 			if !filepath.IsAbs(parent) {
-				parent, _ = filepath.Abs(filepath.Join(dir, parent))
+				if parent, err = filepath.Abs(filepath.Join(dir, parent)); err != nil {
+					log.Fatal(err)
+				}
 			}
 
 			n.children = append(
@@ -260,14 +259,13 @@ func (n *node) childrenByType(t uint8) []*node {
 	return children
 }
 
-func (n *node) findBlockByName(name string) (block *node) {
+func (n *node) findBlockByName(name string) *node {
 	for _, child := range n.children {
 		if child.t == TypeBlock && child.chunk.String() == name {
-			block = child
-			return
+			return child
 		}
 	}
-	return
+	return nil
 }
 
 func (n *node) rebuild() {

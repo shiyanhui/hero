@@ -69,12 +69,9 @@ func main() {
 	}
 
 	go func() {
-		for {
-			select {
-			case ev := <-watcher.Event:
-				if ev.IsDelete() || ev.IsModify() || ev.IsRename() {
-					hero.Generate(source, dest, pkgName)
-				}
+		for ev := range watcher.Event {
+			if ev.IsDelete() || ev.IsModify() || ev.IsRename() {
+				hero.Generate(source, dest, pkgName)
 			}
 		}
 	}()
@@ -92,7 +89,7 @@ func main() {
 		})
 	}
 
-	done := make(chan os.Signal)
+	done := make(chan os.Signal, 1)
 	signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
 
 	<-done

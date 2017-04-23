@@ -11,11 +11,7 @@ import (
 	"testing"
 )
 
-var replacer *regexp.Regexp
-
-func init() {
-	replacer, _ = regexp.Compile("\\s")
-}
+var replacer = regexp.MustCompile(`\s`)
 
 func TestWriteToFile(t *testing.T) {
 	path := "/tmp/hero.test"
@@ -27,11 +23,13 @@ func TestWriteToFile(t *testing.T) {
 	defer os.Remove(path)
 
 	if _, err := os.Stat(path); err != nil {
-		t.Fail()
+		t.Fatal(err)
 	}
 
-	if c, err := ioutil.ReadFile(path); err != nil || string(c) != content {
-		t.Fail()
+	if c, err := ioutil.ReadFile(path); err != nil {
+		t.Fatal(err)
+	} else if string(c) != content {
+		t.Fatalf("want: %s got: %s", content, c)
 	}
 }
 

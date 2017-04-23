@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"log"
 	"net/http"
 
 	"github.com/shiyanhui/hero/examples/app/template"
@@ -23,7 +24,9 @@ func main() {
 		buffer := new(bytes.Buffer)
 		template.UserList(userList, buffer)
 
-		w.Write(buffer.Bytes())
+		if _, err := w.Write(buffer.Bytes()); err != nil {
+			log.Printf("ERR: %s\n", err)
+		}
 	})
 
 	http.HandleFunc("/users2", func(w http.ResponseWriter, req *http.Request) {
@@ -37,5 +40,5 @@ func main() {
 		template.UserListToWriter(userList, w)
 	})
 
-	http.ListenAndServe(":8080", nil)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -19,7 +19,7 @@ import (
 const TypeBytesBuffer = "bytes.Buffer"
 const TypeIOWriter = "io.Writer"
 
-var expectParamError = errors.New(
+var errExpectParam = errors.New(
 	"The last parameter should be *bytes.Buffer or io.Writer type",
 )
 
@@ -54,7 +54,10 @@ func writeToFile(path string, buffer *bytes.Buffer) {
 
 func genAbsPath(path string) string {
 	if !filepath.IsAbs(path) {
-		path, _ = filepath.Abs(path)
+		var err error
+		if path, err = filepath.Abs(path); err != nil {
+			log.Fatal(err)
+		}
 	}
 	return path
 }
@@ -101,13 +104,13 @@ func parseParams(funcDecl *ast.FuncDecl) (name, t string, err error) {
 
 	selectorExpr, ok := expr.(*ast.SelectorExpr)
 	if !ok {
-		err = expectParamError
+		err = errExpectParam
 		return
 	}
 
 	t = fmt.Sprintf("%s.%s", selectorExpr.X, selectorExpr.Sel)
 	if t != TypeBytesBuffer && t != TypeIOWriter {
-		err = errors.New("waht the funck " + t)
+		err = fmt.Errorf("'%s' expected to be '%s' or '%s'", t, TypeBytesBuffer, TypeIOWriter)
 		return
 	}
 
@@ -182,7 +185,7 @@ func gen(n *node, buffer *bytes.Buffer, bufName string) {
 	}
 }
 
-// Generate generates go code from source to test. pkgName represents the
+// Generate generates Go code from source to test. pkgName represents the
 // package name of the generated code.
 func Generate(source, dest, pkgName string) {
 	defer cleanGlobal()
@@ -206,7 +209,7 @@ func Generate(source, dest, pkgName string) {
 			log.Fatal(err)
 		}
 	} else if !stat.IsDir() {
-		log.Fatal(dest + " is not dir")
+		log.Fatal(dest + " is not a directory")
 	} else if err != nil {
 		log.Fatal(err)
 	}

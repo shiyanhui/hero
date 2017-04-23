@@ -258,9 +258,9 @@ func TestParseFile(t *testing.T) {
 	pathList := filepath.Join(rootDir, "list.html")
 
 	vertices := map[string]struct{}{
-		pathIndex: struct{}{},
-		pathItem:  struct{}{},
-		pathList:  struct{}{},
+		pathIndex: {},
+		pathItem:  {},
+		pathList:  {},
 	}
 
 	if !reflect.DeepEqual(vertices, dependencies.vertices) {
@@ -268,11 +268,11 @@ func TestParseFile(t *testing.T) {
 	}
 
 	graph := map[string]map[string]struct{}{
-		pathIndex: map[string]struct{}{
-			pathList: struct{}{},
+		pathIndex: {
+			pathList: {},
 		},
-		pathItem: map[string]struct{}{
-			pathList: struct{}{},
+		pathItem: {
+			pathList: {},
 		},
 	}
 
