@@ -259,14 +259,13 @@ func (n *node) childrenByType(t uint8) []*node {
 	return children
 }
 
-func (n *node) findBlockByName(name string) (block *node) {
+func (n *node) findBlockByName(name string) *node {
 	for _, child := range n.children {
 		if child.t == TypeBlock && child.chunk.String() == name {
-			block = child
-			return
+			return child
 		}
 	}
-	return
+	return nil
 }
 
 func (n *node) rebuild() {
