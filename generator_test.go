@@ -41,8 +41,8 @@ func TestGenAbsPath(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	parts := strings.Split(dir, "/")
-	parent := strings.Join(parts[:len(parts)-1], "/")
+	parts := strings.Split(dir, string(filepath.Separator))
+	parent := strings.Join(parts[:len(parts)-1], string(filepath.Separator))
 
 	cases := []struct {
 		in  string
