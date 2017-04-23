@@ -11,11 +11,7 @@ import (
 	"testing"
 )
 
-var replacer *regexp.Regexp
-
-func init() {
-	replacer, _ = regexp.Compile("\\s")
-}
+var replacer = regexp.MustCompile(`\s`)
 
 func TestWriteToFile(t *testing.T) {
 	path := "/tmp/hero.test"

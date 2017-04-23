@@ -19,7 +19,7 @@ import (
 const TypeBytesBuffer = "bytes.Buffer"
 const TypeIOWriter = "io.Writer"
 
-var expectParamError = errors.New(
+var errExpectParam = errors.New(
 	"The last parameter should be *bytes.Buffer or io.Writer type",
 )
 
@@ -104,7 +104,7 @@ func parseParams(funcDecl *ast.FuncDecl) (name, t string, err error) {
 
 	selectorExpr, ok := expr.(*ast.SelectorExpr)
 	if !ok {
-		err = expectParamError
+		err = errExpectParam
 		return
 	}
 
@@ -185,7 +185,7 @@ func gen(n *node, buffer *bytes.Buffer, bufName string) {
 	}
 }
 
-// Generate generates go code from source to test. pkgName represents the
+// Generate generates Go code from source to test. pkgName represents the
 // package name of the generated code.
 func Generate(source, dest, pkgName string) {
 	defer cleanGlobal()
