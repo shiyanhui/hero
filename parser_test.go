@@ -6,11 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 )
 
-const rootDir = "/tmp/gohero"
+var rootDir string
 
 const indexHTML = `
 <!DOCTYPE html>
@@ -78,6 +79,12 @@ const listToWriterWithResultHTML = `
 `
 
 func init() {
+	if runtime.GOOS != "windows" {
+		rootDir = "/tmp/gohero"
+	} else {
+		rootDir = `C:\tmp\gohero`
+	}
+
 	_, err := os.Stat(rootDir)
 	if !os.IsNotExist(err) {
 		if err = os.RemoveAll(rootDir); err != nil {

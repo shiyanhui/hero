@@ -2,13 +2,18 @@ package hero
 
 import (
 	"bytes"
+	"runtime"
 	"testing"
 )
 
 func TestExecCommand(t *testing.T) {
 	// test for panic
-	execCommand("")
-	execCommand("ls")
+	if runtime.GOOS != "windows" {
+		execCommand("")
+		execCommand("ls")
+	} else {
+		execCommand("dir")
+	}
 }
 
 func TestFormatUint(t *testing.T) {
