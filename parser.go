@@ -204,7 +204,9 @@ func (n *node) insert(dir, subpath string, content []byte) {
 
 			parent := string(c[1 : len(c)-1])
 			if !filepath.IsAbs(parent) {
-				parent, _ = filepath.Abs(filepath.Join(dir, parent))
+				if parent, err = filepath.Abs(filepath.Join(dir, parent)); err != nil {
+					log.Fatal(err)
+				}
 			}
 
 			n.children = append(

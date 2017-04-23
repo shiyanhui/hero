@@ -54,7 +54,10 @@ func writeToFile(path string, buffer *bytes.Buffer) {
 
 func genAbsPath(path string) string {
 	if !filepath.IsAbs(path) {
-		path, _ = filepath.Abs(path)
+		var err error
+		if path, err = filepath.Abs(path); err != nil {
+			log.Fatal(err)
+		}
 	}
 	return path
 }
@@ -107,7 +110,7 @@ func parseParams(funcDecl *ast.FuncDecl) (name, t string, err error) {
 
 	t = fmt.Sprintf("%s.%s", selectorExpr.X, selectorExpr.Sel)
 	if t != TypeBytesBuffer && t != TypeIOWriter {
-		err = errors.New("waht the funck " + t)
+		err = fmt.Errorf("'%s' expected to be '%s' or '%s'", t, TypeBytesBuffer, TypeIOWriter)
 		return
 	}
 
@@ -206,7 +209,7 @@ func Generate(source, dest, pkgName string) {
 			log.Fatal(err)
 		}
 	} else if !stat.IsDir() {
-		log.Fatal(dest + " is not dir")
+		log.Fatal(dest + " is not a directory")
 	} else if err != nil {
 		log.Fatal(err)
 	}
