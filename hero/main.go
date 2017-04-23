@@ -69,12 +69,9 @@ func main() {
 	}
 
 	go func() {
-		for {
-			select {
-			case ev := <-watcher.Event:
-				if ev.IsDelete() || ev.IsModify() || ev.IsRename() {
-					hero.Generate(source, dest, pkgName)
-				}
+		for ev := range watcher.Event {
+			if ev.IsDelete() || ev.IsModify() || ev.IsRename() {
+				hero.Generate(source, dest, pkgName)
 			}
 		}
 	}()
