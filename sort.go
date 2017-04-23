@@ -22,7 +22,7 @@ func (s *sort) addVertex(vertex string) {
 func (s *sort) addEdge(from, to string) {
 	if _, ok := s.graph[from]; !ok {
 		s.graph[from] = map[string]struct{}{
-			to: struct{}{},
+			to: {},
 		}
 	} else {
 		s.graph[from][to] = struct{}{}
