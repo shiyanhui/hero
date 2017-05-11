@@ -78,6 +78,19 @@ const listToWriterWithResultHTML = `
 <% } %>
 `
 
+const listReturnsByteArrayHTML = `
+<%: func UserListReturnsByteArray(userList []string) []byte %>
+
+<%~ "index.html" %>
+
+<%@ body { %>
+    <%# this is note %>
+    <% for _, user := range userList { %>
+        <%+ "item.html" %>
+    <% } %>
+<% } %>
+`
+
 func init() {
 	if runtime.GOOS != "windows" {
 		rootDir = "/tmp/gohero"
@@ -104,6 +117,7 @@ func init() {
 		{"list.html", listHTML},
 		{"listwriter.html", listToWriterHTML},
 		{"listwriterresult.html", listToWriterWithResultHTML},
+		{"listbytearray.html", listReturnsByteArrayHTML},		
 	}
 
 	for _, item := range items {
