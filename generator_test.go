@@ -222,11 +222,14 @@ func UserListToWriterWithResult(userList []string, w io.Writer) (n int, err erro
 // DO NOT EDIT!
 package template
 
-import "github.com/shiyanhui/hero"
+import (
+	"bytes"
+
+	"github.com/shiyanhui/hero"
+)
 
 func UserListReturnsByteArray(userList []string) []byte {
-    _buffer := hero.GetBuffer()
-    defer hero.PutBuffer(_buffer)
+    _buffer := new(bytes.Buffer)
     _buffer.WriteString(` + "`" + `
 <!DOCTYPE html>
 <html>
