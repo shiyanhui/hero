@@ -40,5 +40,15 @@ func main() {
 		template.UserListToWriter(userList, w)
 	})
 
+	http.HandleFunc("/users3", func(w http.ResponseWriter, req *http.Request) {
+		var userList = []string{
+			"Alice",
+			"Bob",
+			"Tom",
+		}
+
+		w.Write(template.UserListReturnsByteArray(userList))
+	})
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

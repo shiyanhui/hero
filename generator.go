@@ -18,6 +18,7 @@ import (
 
 const TypeBytesBuffer = "bytes.Buffer"
 const TypeIOWriter = "io.Writer"
+const TypeByteArray = "[]byte"
 
 var errExpectParam = errors.New(
 	"The last parameter should be *bytes.Buffer or io.Writer type",
@@ -87,6 +88,17 @@ func parseDefinition(definition string) (*ast.FuncDecl, error) {
 
 // parseParams parses parameters in the function definition.
 func parseParams(funcDecl *ast.FuncDecl) (name, t string, err error) {
+	if funcDecl.Type.Results != nil && len(funcDecl.Type.Results.List) == 1 {
+		if arrType,ok := funcDecl.Type.Results.List[0].Type.(*ast.ArrayType); ok {
+			if ident,ok := arrType.Elt.(*ast.Ident); ok {
+				if ident.Name == "byte" {
+					t = TypeByteArray
+					return
+				}
+			}
+		}
+	}
+
 	params := funcDecl.Type.Params.List
 	if len(params) == 0 {
 		err = errors.New(
@@ -286,6 +298,23 @@ func Generate(source, dest, pkgName string) {
 					fmt.Sprintf(
 						"%s %s.Write(%s.Bytes())\n",
 						ret, paramName, bufName,
+					),
+				)
+			} else if paramType == TypeByteArray {
+				bufName := "_buffer"
+
+				buffer.WriteString(
+					fmt.Sprintf(
+						"%s := new(bytes.Buffer)\n",
+						bufName,
+					),
+				)
+				gen(n, buffer, bufName)
+
+				buffer.WriteString(
+					fmt.Sprintf(
+						"return %s.Bytes()",
+						bufName,
 					),
 				)
 			} else {
