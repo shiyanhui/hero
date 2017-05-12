@@ -305,8 +305,8 @@ func Generate(source, dest, pkgName string) {
 
 				buffer.WriteString(
 					fmt.Sprintf(
-						"%s := hero.GetBuffer()\ndefer hero.PutBuffer(%s)\n",
-						bufName, bufName,
+						"%s := new(bytes.Buffer)\n",
+						bufName,
 					),
 				)
 				gen(n, buffer, bufName)
