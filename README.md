@@ -273,8 +273,8 @@ There are only nine necessary kinds of statements, which are:
 
 - Escaped Value `<%=[t] variable %>`
 
-  - Escaped Value statement is similar with Raw Value statement, but after converting, it will escaped it with `html.EscapesString`.
-  - `t` is the same with that of `Raw Value Statement`.
+  - Escaped Value statement is similar with Raw Value statement, but after converting, it will be escaped it with `html.EscapesString`.
+  - `t` is the same as in `Raw Value Statement`.
   - Example:
 
     ```go
