@@ -159,9 +159,9 @@ At last, start the server and visit `http://localhost:8080/users` in your browse
 There are only nine necessary kinds of statements, which are:
 
 - Function Definition `<%: func define %>`
-  - Function definition statement defines the function which represents a html file.
+  - Function definition statement defines the function which represents an html file.
   - The type of the last parameter in the function defined should be `*bytes.Buffer` for manual buffer management or `io.Writer` for automatic buffer management (
-    note: if using `io.Writer` you may optionally specify return values `(int, error)` to handle the result of `io.Wirter.Write`). Hero will identify the parameter name
+    note: if using `io.Writer` you may optionally specify return values `(int, error)` to handle the result of `io.Writer.Write`). Hero will identify the parameter name
     automaticly.
   - Example:
     - `<%: func UserList(userList []string, buffer *bytes.Buffer) %>`
@@ -273,8 +273,8 @@ There are only nine necessary kinds of statements, which are:
 
 - Escaped Value `<%=[t] variable %>`
 
-  - Escaped Value statement is similar with Raw Value statement, but after converting, it will escaped it with `html.EscapesString`.
-  - `t` is the same with that of `Raw Value Statement`.
+  - Escaped Value statement is similar with Raw Value statement, but after converting, it will be escaped it with `html.EscapesString`.
+  - `t` is the same as in `Raw Value Statement`.
   - Example:
 
     ```go
