@@ -15,8 +15,10 @@ func newSort() *sort {
 	}
 }
 
-func (s *sort) addVertex(vertex string) {
-	s.vertices[vertex] = struct{}{}
+func (s *sort) addVertices(vertices ...string) {
+	for _, vertex := range vertices {
+		s.vertices[vertex] = struct{}{}
+	}
 }
 
 func (s *sort) addEdge(from, to string) {

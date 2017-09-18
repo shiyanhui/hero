@@ -201,7 +201,8 @@ func (n *node) insert(dir, subpath string, content []byte) {
 
 			parent := string(c[1 : len(c)-1])
 			if !filepath.IsAbs(parent) {
-				if parent, err = filepath.Abs(filepath.Join(dir, parent)); err != nil {
+				if parent, err = filepath.Abs(
+					filepath.Join(dir, parent)); err != nil {
 					log.Fatal(err)
 				}
 			}
@@ -211,8 +212,7 @@ func (n *node) insert(dir, subpath string, content []byte) {
 				newNode(prefixTypeMap[content[0]], []byte(parent)),
 			)
 
-			dependencies.addVertex(parent)
-			dependencies.addVertex(path)
+			dependencies.addVertices(parent, path)
 			dependencies.addEdge(parent, path)
 		case At:
 			chunk := bytes.TrimSpace(content[1:i])
@@ -285,7 +285,8 @@ func (n *node) rebuild() {
 
 		for _, child := range pNode.children {
 			switch child.t {
-			case TypeHTML, TypeCode, TypeEscapedValue, TypeRawValue, TypeInclude:
+			case TypeHTML, TypeCode, TypeEscapedValue,
+				TypeRawValue, TypeInclude:
 				children = append(children, child)
 			case TypeBlock:
 				block := n.findBlockByName(child.chunk.String())
@@ -300,13 +301,12 @@ func (n *node) rebuild() {
 		return
 	}
 
+	newChildren := make([]*node, 0)
 	for _, child := range n.children {
 		switch child.t {
-		case TypeBlock:
-			child.rebuild()
 		case TypeInclude:
 			key := child.chunk.String()
-			node, ok := parsedNodes[key]
+			includeNode, ok := parsedNodes[key]
 			if !ok {
 				var keys []string
 				for k := range parsedNodes {
@@ -314,9 +314,36 @@ func (n *node) rebuild() {
 				}
 				log.Fatalf("node \"%s\" not found. have: %v", key, keys)
 			}
-			child.children = node.children
+
+			for _, t := range []uint8{
+				TypeExtend,
+				TypeInclude,
+				TypeDefinition} {
+				if len(includeNode.childrenByType(t)) != 0 {
+					log.Fatalf(
+						"there shouldn't be any of statement of Extend, "+
+							"Include or Definition in sub-template %s",
+						key,
+					)
+				}
+			}
+
+			for _, childNode := range includeNode.children {
+				if childNode.t == TypeImport {
+					newChildren = append([]*node{childNode}, newChildren...)
+				} else {
+					newChildren = append(newChildren, childNode)
+				}
+			}
+		case TypeBlock:
+			child.rebuild()
+			fallthrough
+		default:
+			newChildren = append(newChildren, child)
 		}
 	}
+
+	n.children = newChildren
 }
 
 func parseFile(dir, subpath string) *node {
@@ -331,7 +358,7 @@ func parseFile(dir, subpath string) *node {
 	}
 
 	// add dependency.
-	dependencies.addVertex(path)
+	dependencies.addVertices(path)
 
 	root := newNode(TypeRoot, nil)
 	root.insert(dir, subpath, content)
@@ -350,7 +377,9 @@ func parseFile(dir, subpath string) *node {
 }
 
 func parseDir(dir string) {
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(dir, func(
+		path string, info os.FileInfo, err error) error {
+
 		stat, err := os.Stat(path)
 		if err != nil {
 			return err

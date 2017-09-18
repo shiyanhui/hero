@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-func TestAddVertex(t *testing.T) {
+func TestAddVertices(t *testing.T) {
 	sort := newSort()
 
 	vertices := []string{"a", "b", "c", "d", "e"}
 	for _, vertex := range vertices {
-		sort.addVertex(vertex)
+		sort.addVertices(vertex)
 	}
 
 	if len(sort.vertices) != len(vertices) {
@@ -80,7 +80,7 @@ func TestSort(t *testing.T) {
 
 	vertices := []string{"a", "b", "c", "d", "e"}
 	for _, vertex := range vertices {
-		sort.addVertex(vertex)
+		sort.addVertices(vertex)
 	}
 
 	edges := map[string][]string{

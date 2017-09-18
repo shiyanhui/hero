@@ -16,8 +16,10 @@ import (
 	"sync"
 )
 
-const TypeBytesBuffer = "bytes.Buffer"
-const TypeIOWriter = "io.Writer"
+const (
+	TypeBytesBuffer = "bytes.Buffer"
+	TypeIOWriter    = "io.Writer"
+)
 
 var errExpectParam = errors.New(
 	"The last parameter should be *bytes.Buffer or io.Writer type",
@@ -110,7 +112,10 @@ func parseParams(funcDecl *ast.FuncDecl) (name, t string, err error) {
 
 	t = fmt.Sprintf("%s.%s", selectorExpr.X, selectorExpr.Sel)
 	if t != TypeBytesBuffer && t != TypeIOWriter {
-		err = fmt.Errorf("'%s' expected to be '%s' or '%s'", t, TypeBytesBuffer, TypeIOWriter)
+		err = fmt.Errorf(
+			"'%s' expected to be '%s' or '%s'",
+			t, TypeBytesBuffer, TypeIOWriter,
+		)
 		return
 	}
 
@@ -222,7 +227,10 @@ func Generate(source, dest, pkgName string) {
 
 		fileName := filepath.Join(dest, fmt.Sprintf(
 			"%s.go",
-			strings.Join(strings.Split(path[len(source)+1:], string(filepath.Separator)), "_"),
+			strings.Join(strings.Split(
+				path[len(source)+1:],
+				string(filepath.Separator),
+			), "_"),
 		))
 
 		go func(n *node, source, fileName string) {

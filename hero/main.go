@@ -80,7 +80,9 @@ func main() {
 
 	stat, _ := os.Stat(source)
 	if stat.IsDir() {
-		filepath.Walk(source, func(path string, _ os.FileInfo, err error) error {
+		filepath.Walk(source, func(
+			path string, _ os.FileInfo, err error) error {
+
 			stat, _ := os.Stat(path)
 			if stat.IsDir() {
 				watchFile(watcher, path)
