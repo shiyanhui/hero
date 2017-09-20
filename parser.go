@@ -346,6 +346,16 @@ func (n *node) rebuild() {
 	n.children = newChildren
 }
 
+func CheckExtension(path string, extensions []string) bool {
+	extension := filepath.Ext(path)
+	for _, item := range extensions {
+		if item == extension {
+			return true
+		}
+	}
+	return false
+}
+
 func parseFile(dir, subpath string) *node {
 	path, err := filepath.Abs(filepath.Join(dir, subpath))
 	if err != nil {
@@ -372,11 +382,12 @@ func parseFile(dir, subpath string) *node {
 			)
 		}
 	}
+	parsedNodes[path] = root
 
 	return root
 }
 
-func parseDir(dir string) {
+func parseDir(dir string, extensions []string) {
 	err := filepath.Walk(dir, func(
 		path string, info os.FileInfo, err error) error {
 
@@ -385,16 +396,17 @@ func parseDir(dir string) {
 			return err
 		}
 
-		if filepath.Ext(path) == ".html" && !stat.IsDir() {
-			node := parseFile(dir, path[len(dir):])
-			parsedNodes[path] = node
+		if !stat.IsDir() && CheckExtension(path, extensions) {
+			parseFile(dir, path[len(dir):])
 		}
 		return nil
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
+}
 
+func rebuild() {
 	queue := dependencies.sort()
 	for _, path := range queue {
 		if _, err := os.Stat(path); err == nil {
@@ -407,6 +419,10 @@ func parseDir(dir string) {
 	}
 
 	for _, path := range queue {
-		parsedNodes[path].rebuild()
+		if node, ok := parsedNodes[path]; !ok {
+			log.Fatalf("dependency %s not parsed", path)
+		} else {
+			node.rebuild()
+		}
 	}
 }

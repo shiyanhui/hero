@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 
 	"github.com/howeyc/fsnotify"
@@ -13,8 +14,11 @@ import (
 )
 
 var (
-	watch                 bool
-	source, dest, pkgName string
+	watch     bool
+	source    string
+	dest      string
+	pkgName   string
+	extension string
 )
 
 func init() {
@@ -29,6 +33,12 @@ func init() {
 		"dest",
 		"",
 		"generated golang files dir, it will be the same with source if not set",
+	)
+	flag.StringVar(
+		&extension,
+		"extensions",
+		".html",
+		"source file extensions, comma splitted if many",
 	)
 	flag.StringVar(
 		&pkgName,
@@ -57,7 +67,12 @@ func main() {
 		dest = source
 	}
 
-	hero.Generate(source, dest, pkgName)
+	extensions := strings.Split(extension, ",")
+	for i, item := range extensions {
+		extensions[i] = strings.TrimSpace(item)
+	}
+
+	hero.Generate(source, dest, pkgName, extensions)
 
 	if !watch {
 		return
@@ -70,8 +85,9 @@ func main() {
 
 	go func() {
 		for ev := range watcher.Event {
-			if ev.IsDelete() || ev.IsModify() || ev.IsRename() {
-				hero.Generate(source, dest, pkgName)
+			if hero.CheckExtension(ev.Name, extensions) &&
+				(ev.IsDelete() || ev.IsModify() || ev.IsRename()) {
+				hero.Generate(source, dest, pkgName, extensions)
 			}
 		}
 	}()

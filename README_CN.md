@@ -42,10 +42,11 @@ Hero在目前已知的模板引擎中是速度是最快的，并且内存使用�
 hero [options]
 
 options:
-	- source:  模板目录，默认为当前目录
-	- dest:    生成的go代码的目录，如果没有设置的话，和source一样
-	- pkgname: 生成的go代码包的名称，默认为template
-	- watch:   是否监控模板文件改动并自动编译
+	- source:     模板目录，默认为当前目录
+	- dest:       生成的go代码的目录，如果没有设置的话，和source一样
+	- pkgname:    生成的go代码包的名称，默认为template
+  - extensions: source文件的后缀, 如果有多个则用英文逗号隔开, 默认为.html
+	- watch:      是否监控模板文件改动并自动编译
 
 example:
 	hero -source="./"

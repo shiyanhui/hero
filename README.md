@@ -46,15 +46,20 @@ go get golang.org/x/tools/cmd/goimports
 ```shell
 hero [options]
 
-options:
-	- source:  the html template file or dir, default is current dir.
-	- dest:    generated golang files dir, it will be the same with source if not set.
-	- pkgname: the generated template package name, default is `template`.
-	- watch:   whether auto compile when the source files change.
+  -source string
+        the html template file or dir (default "./")
+  -dest string
+        generated golang files dir, it will be the same with source if not set
+  -extensions string
+        source file extensions, comma splitted if many (default ".html")
+  -pkgname template
+        the generated template package name, default is template (default "template")
+  -watch
+        whether automatically compile when the source files change
 
 example:
 	hero -source="./"
-	hero -source="$GOPATH/src/app/template" -watch
+	hero -source="$GOPATH/src/app/template" -dest="./" -extends=".html,.htm" -pkgname="t" -watch
 ```
 
 ## Quick Start

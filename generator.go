@@ -192,29 +192,35 @@ func gen(n *node, buffer *bytes.Buffer, bufName string) {
 
 // Generate generates Go code from source to test. pkgName represents the
 // package name of the generated code.
-func Generate(source, dest, pkgName string) {
+func Generate(source, dest, pkgName string, extensions []string) {
 	defer cleanGlobal()
 
 	source, dest = genAbsPath(source), genAbsPath(dest)
+	sourceDir := source
 
-	stat, err := os.Stat(source)
+	srcStat, err := os.Stat(source)
 	checkError(err)
 
 	fmt.Println("Parsing...")
-	if stat.IsDir() {
-		parseDir(source)
+	if srcStat.IsDir() {
+		parseDir(source, extensions)
 	} else {
+		sourceDir = filepath.Dir(source)
 		source, file := filepath.Split(source)
 		parseFile(source, file)
 	}
+	rebuild()
 
-	stat, err = os.Stat(dest)
+	destStat, err := os.Stat(dest)
 	if os.IsNotExist(err) {
 		if err = os.MkdirAll(dest, os.ModePerm); err != nil {
 			log.Fatal(err)
 		}
-	} else if !stat.IsDir() {
-		log.Fatal(dest + " is not a directory")
+	} else if !destStat.IsDir() {
+		if srcStat.IsDir() {
+			log.Fatal(dest + " is not a directory")
+		}
+		dest = filepath.Dir(dest)
 	} else if err != nil {
 		log.Fatal(err)
 	}
@@ -228,7 +234,7 @@ func Generate(source, dest, pkgName string) {
 		fileName := filepath.Join(dest, fmt.Sprintf(
 			"%s.go",
 			strings.Join(strings.Split(
-				path[len(source)+1:],
+				path[len(sourceDir)+1:],
 				string(filepath.Separator),
 			), "_"),
 		))
