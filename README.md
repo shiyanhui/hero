@@ -59,7 +59,7 @@ hero [options]
 
 example:
 	hero -source="./"
-	hero -source="$GOPATH/src/app/template" -dest="./" -extends=".html,.htm" -pkgname="t" -watch
+	hero -source="$GOPATH/src/app/template" -dest="./" -extensions=".html,.htm" -pkgname="t" -watch
 ```
 
 ## Quick Start
