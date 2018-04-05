@@ -136,6 +136,10 @@ func parseResults(funcDecl *ast.FuncDecl) (types []string) {
 	return
 }
 
+func escapeBackQuote(str string) string {
+	return strings.Replace(str, "`", "`+\"`\"+`", -1)
+}
+
 // gen generates code to buffer.
 func gen(n *node, buffer *bytes.Buffer, bufName string) {
 	for _, child := range n.children {
@@ -146,7 +150,7 @@ func gen(n *node, buffer *bytes.Buffer, bufName string) {
 			buffer.WriteString(fmt.Sprintf(
 				"%s.WriteString(`%s`)",
 				bufName,
-				child.chunk.String(),
+				escapeBackQuote(child.chunk.String()),
 			))
 		case TypeRawValue, TypeEscapedValue:
 			var format string
