@@ -84,11 +84,7 @@ func FormatFloat(f float64, buffer *bytes.Buffer) {
 
 // FormatBool format bool to string and then put the result to the buffer.
 func FormatBool(b bool, buffer *bytes.Buffer) {
-	if b {
-		buffer.WriteString("true")
-		return
-	}
-	buffer.WriteString("false")
+	buffer.WriteString(fmt.Sprintf("%t", b))
 }
 
 // execCommand wraps exec.Command
