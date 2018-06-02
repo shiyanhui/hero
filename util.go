@@ -93,10 +93,10 @@ func FormatBool(b bool, buffer *bytes.Buffer) {
 
 // execCommand wraps exec.Command
 func execCommand(command string) {
-	parts := strings.Split(command, " ")
-	if len(parts) == 0 {
+	if strings.TrimSpace(command) == "" {
 		return
 	}
+	parts := strings.Split(command, " ")
 
 	cmd := exec.Command(parts[0], parts[1:]...)
 	cmd.Stderr = os.Stderr
