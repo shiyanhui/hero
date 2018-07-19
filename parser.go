@@ -347,9 +347,9 @@ func (n *node) rebuild() {
 }
 
 func CheckExtension(path string, extensions []string) bool {
-	extension := filepath.Ext(path)
 	for _, item := range extensions {
-		if item == extension {
+		i := len(path) - len(item)
+		if i >= 0 && path[i:] == item {
 			return true
 		}
 	}
