@@ -37,7 +37,7 @@ func init() {
 	flag.StringVar(
 		&extension,
 		"extensions",
-		".html",
+		".html,.svg",
 		"source file extensions, comma splitted if many",
 	)
 	flag.StringVar(

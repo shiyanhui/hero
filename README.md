@@ -51,7 +51,7 @@ hero [options]
   -dest string
         generated golang files dir, it will be the same with source if not set
   -extensions string
-        source file extensions, comma splitted if many (default ".html")
+        source file extensions, comma splitted if many (default ".html,.svg")
   -pkgname template
         the generated template package name, default is template (default "template")
   -watch
