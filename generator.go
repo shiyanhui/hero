@@ -323,5 +323,5 @@ func Generate(source, dest, pkgName string, extensions []string) {
 	execCommand("goimports -w " + dest)
 
 	fmt.Println("Executing go vet...")
-	execCommand("go tool vet -v " + dest)
+	execCommand("go vet -v " + dest)
 }
