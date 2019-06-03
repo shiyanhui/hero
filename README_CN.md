@@ -217,7 +217,7 @@ Hero总共有九种语句，他们分别是：
   - 例:
 
     ```go
-    <% for _, user := userList { %>
+    <% for _, user := range userList { %>
         <% if user != "Alice" { %>
         	<%= user %>
         <% } %>

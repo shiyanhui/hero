@@ -240,7 +240,7 @@ There are only nine necessary kinds of statements, which are:
   - Example:
 
     ```go
-    <% for _, user := userList { %>
+    <% for _, user := range userList { %>
         <% if user != "Alice" { %>
             <%= user %>
         <% } %>
