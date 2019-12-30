@@ -391,6 +391,10 @@ func parseDir(dir string, extensions []string) {
 	err := filepath.Walk(dir, func(
 		path string, info os.FileInfo, err error) error {
 
+		if err != nil {
+			return err
+		}
+
 		stat, err := os.Stat(path)
 		if err != nil {
 			return err
